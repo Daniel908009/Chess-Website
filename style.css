@@ -1,0 +1,19 @@
+body{
+    font-family: Arial, sans-serif;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+footer{
+    text-align: center;
+    margin-top: 20px;
+    background-color: blue;
+    color: black;
+    width: 100%;
+}
+.chessboard{
+    background-color: black;
+    width: 800px;
+    height: 800px;
+}
