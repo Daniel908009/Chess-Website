@@ -1,1 +1,0 @@
-Libraries of the project are stored here
