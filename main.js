@@ -21,10 +21,12 @@ class Pawn extends Piece {
     GetMoves() {
         let moves = []
         if (this.player == 1) {
-            if (this.numMoves == 0) {
-                moves.push([this.x, this.y + 2])
+            if (gameGrid[this.y + 1][this.x] == null) {
+                moves.push([this.x, this.y + 1])
+                if (this.numMoves == 0 && gameGrid[this.y + 2][this.x] == null){
+                    moves.push([this.x, this.y + 2])
+                }
             }
-            moves.push([this.x, this.y + 1])
             if (gameGrid[this.y +1][this.x +1] != null && gameGrid[this.y +1][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y +1])
             }
@@ -41,10 +43,12 @@ class Pawn extends Piece {
             }
         }
         else {
-            if (this.numMoves == 0) {
-                moves.push([this.x, this.y - 2])
+            if (gameGrid[this.y -1][this.x] == null){
+                moves.push([this.x, this.y - 1])
+                if (this.numMoves == 0 && gameGrid[this.y -2][this.x] == null){
+                    moves.push([this.x, this.y - 2])
+                }
             }
-            moves.push([this.x, this.y - 1])
             if (gameGrid[this.y -1][this.x +1] != null && gameGrid[this.y -1][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y -1])
             }
@@ -153,7 +157,6 @@ class Bishop extends Piece {
     GetMoves() {
         let moves = []
         let temp = true;
-        //console.log("this was called")
         let i = 1;
         while(temp){
             if (this.x + i < 8 && this.y + i < 8){
@@ -164,7 +167,6 @@ class Bishop extends Piece {
                     temp = false;
                 }else{
                     temp = false;
-                    //console.log('friendly piece', gameGrid[this.y + i][this.x + i])
                 }
                 i++;
             }else{
@@ -245,14 +247,12 @@ class Knight extends Piece {
                 moves.push([this.x +2, this.y +1])
             }else if (gameGrid[this.y +1][this.x +2].player != this.player){
                 moves.push([this.x +2, this.y +1])
-                console.log(gameGrid[this.y +1][this.x +2].player)
             }}
         if (this.x - 2 >= 0 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x -2] == null){
                 moves.push([this.x -2, this.y +1])
             }else if (gameGrid[this.y +1][this.x -2].player != this.player){
                 moves.push([this.x -2, this.y +1])
-                console.log(gameGrid[this.y +1][this.x -2].player)
             }
         }
         if (this.x +2 < 8 && this.y - 1 >= 0){
@@ -260,7 +260,6 @@ class Knight extends Piece {
                 moves.push([this.x +2, this.y -1])
             }else if (gameGrid[this.y -1][this.x +2].player != this.player){
                 moves.push([this.x +2, this.y -1])
-                console.log(gameGrid[this.y -1][this.x +2].player)
             }
         }
         if (this.x - 2 >= 0 && this.y - 1 >= 0){
@@ -268,7 +267,6 @@ class Knight extends Piece {
                 moves.push([this.x -2, this.y -1])
             }else if (gameGrid[this.y -1][this.x -2].player != this.player){
                 moves.push([this.x -2, this.y -1])
-                console.log(gameGrid[this.y -1][this.x -2].player)
             }
         }
         if (this.y + 2 < 8 && this.x + 1 < 8){
@@ -276,28 +274,24 @@ class Knight extends Piece {
                 moves.push([this.x +1, this.y +2])
             }else if (gameGrid[this.y +2][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y +2])
-                console.log(gameGrid[this.y +2][this.x +1].player)
             }}
         if (this.y + 2 < 8 && this.x - 1 >= 0){
             if (gameGrid[this.y +2][this.x -1] == null){
                 moves.push([this.x -1, this.y +2])
             }else if (gameGrid[this.y +2][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y +2])
-                console.log(gameGrid[this.y +2][this.x -1].player)
             }}
         if (this.y - 2 >= 0 && this.x + 1 < 8){
             if (gameGrid[this.y -2][this.x +1] == null){
                 moves.push([this.x +1, this.y -2])
             }else if (gameGrid[this.y -2][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y -2])
-                console.log(gameGrid[this.y -2][this.x +1].player)
             }}
         if (this.y - 2 >= 0 && this.x - 1 >= 0){
             if (gameGrid[this.y -2][this.x -1] == null){
                 moves.push([this.x -1, this.y -2])
             }else if (gameGrid[this.y -2][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y -2])
-                console.log(gameGrid[this.y -2][this.x -1].player)
             }}
         return moves
     }
@@ -320,14 +314,12 @@ class King extends Piece {
                 moves.push([this.x +1, this.y +1])
             }else if (gameGrid[this.y +1][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y +1])
-                console.log(gameGrid[this.y +1][this.x +1].player)
             }}
         if (this.x - 1 >= 0 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x -1] == null){
                 moves.push([this.x -1, this.y +1])
             }else if (gameGrid[this.y +1][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y +1])
-                console.log(gameGrid[this.y +1][this.x -1].player)
             }
         }
         if (this.x +1 < 8 && this.y - 1 >= 0){
@@ -335,7 +327,6 @@ class King extends Piece {
                 moves.push([this.x +1, this.y -1])
             }else if (gameGrid[this.y -1][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y -1])
-                console.log(gameGrid[this.y -1][this.x +1].player)
             }
         }
         if (this.x - 1 >= 0 && this.y - 1 >= 0){
@@ -343,7 +334,6 @@ class King extends Piece {
                 moves.push([this.x -1, this.y -1])
             }else if (gameGrid[this.y -1][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y -1])
-                console.log(gameGrid[this.y -1][this.x -1].player)
             }
         }
         if (this.y + 1 < 8){
@@ -351,28 +341,24 @@ class King extends Piece {
                 moves.push([this.x, this.y +1])
             }else if (gameGrid[this.y +1][this.x].player != this.player){
                 moves.push([this.x, this.y +1])
-                console.log(gameGrid[this.y +1][this.x].player)
             }}
         if (this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x] == null){
                 moves.push([this.x, this.y -1])
             }else if (gameGrid[this.y -1][this.x].player != this.player){
                 moves.push([this.x, this.y -1])
-                console.log(gameGrid[this.y -1][this.x].player)
             }}
         if (this.x + 1 < 8){
             if (gameGrid[this.y][this.x +1] == null){
                 moves.push([this.x +1, this.y])
             }else if (gameGrid[this.y][this.x +1].player != this.player){
                 moves.push([this.x +1, this.y])
-                console.log(gameGrid[this.y][this.x +1].player)
             }}
         if (this.x - 1 >= 0){
             if (gameGrid[this.y][this.x -1] == null){
                 moves.push([this.x -1, this.y])
             }else if (gameGrid[this.y][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y])
-                console.log(gameGrid[this.y][this.x -1].player)
             }}
         if (this.numMoves == 0){
             if (gameGrid[this.y][this.x +1] == null && gameGrid[this.y][this.x +2] == null && gameGrid[this.y][this.x +3] != null && gameGrid[this.y][this.x +3].type == "Rook" && gameGrid[this.y][this.x +3].numMoves == 0){
@@ -470,9 +456,6 @@ class Queen extends Piece {
         i = 1;
         while(temp){
             if (this.x - i >= 0 && this.y - i >= 0 && i < 8){
-                console.log('i is', i)
-                console.log('x is', this.x - i)
-                console.log('y is', this.y - i)
                 if (gameGrid[this.y - i][this.x - i] == null){
                     moves.push([this.x - i, this.y -i]);
                 }else if (gameGrid[this.y - i][this.x -i].player != this.player){
@@ -545,6 +528,7 @@ for (let i = 0; i < 8; i++) {
 
 let availableMoves = []
 let specialMoves = []
+let currentPlayer = 1;
 let baseSize = 0;
 
 function resizeCanvasFunc(){
@@ -559,6 +543,70 @@ window.addEventListener('resize', function () {
 }
 )
 
+function checkWin(grid, player){
+    let king = null;
+    //console.log(player + " player");
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == player){
+                king = grid[i][j];
+            }
+        }
+    }
+    let moves = []
+    let kingMoves = king.GetMoves();
+    //console.log("player " + player);
+    kingMoves.push([king.x, king.y]);
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (gameGrid[i][j] != null && gameGrid[i][j].player != player){
+                moves.push(gameGrid[i][j].GetMoves());
+                if (gameGrid[i][j].type == "Pawn"){
+                    moves[moves.length - 1].push([gameGrid[i][j].x, gameGrid[i][j].y]);
+                }
+                //if (gameGrid[i][j].type == "Queen"){
+                    //console.log("queen moves " + gameGrid[i][j].GetMoves());
+                //}
+            }
+        }
+    }
+    //console.log("moves lenght " + moves.length);
+    for (let i = 0; i < moves.length; i++){
+        for (let j = 0; j < moves[i].length; j++){
+            for (let k = 0; k < kingMoves.length; k++){
+                if (moves[i][j][0] == kingMoves[k][0] && moves[i][j][1] == kingMoves[k][1]){
+                    kingMoves.splice(k, 1);
+                }
+            }
+        }
+    }
+    console.log("kingMoves " + kingMoves);
+    if (kingMoves.length == 0){
+        return true;
+    }
+    return false;
+}
+
+function resetGame(){
+    gameGrid = []
+    currentPlayer = 1;
+    document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+    availableMoves = [];
+    specialMoves = [];
+    for (let i = 0; i < 8; i++){
+        gameGrid.push([]);
+        for (let j = 0; j < 8; j++){
+            gameGrid[i].push(null);
+        }
+    }
+    for (let x = 0; x < 8; x++) {
+        for (let y = 0; y < 8; y++) {
+            if (gameGridLayout[y][x] != null) {
+                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1]);
+            }
+        }
+    }
+}
 
 function setup() {
     width = windowWidth * 0.8;
@@ -567,13 +615,7 @@ function setup() {
     canvas = createCanvas(size, size);
     baseSize = height / 8;
     canvas.parent('chessboard');
-    for (let x = 0; x < 8; x++) {
-        for (let y = 0; y < 8; y++) {
-            if (gameGridLayout[y][x] != null) {
-                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1]);
-            }
-        }
-    }
+    resetGame();
 }
 
 function drawTiles() {
@@ -584,11 +626,12 @@ function drawTiles() {
                 if (x == availableMoves[k][0] && y == availableMoves[k][1]) {
                     fill(0, 255, 0)
                     isAvailable = true;
-                    console.log('this tile is available')
                 }
             }
-            if ((x + y) % 2 == 0 && !isAvailable) {
-                fill(255);
+            if (gameGrid[y][x] != null && gameGrid[y][x].selected){
+                fill(0, 0, 255);
+            }else if ((x + y) % 2 == 0 && !isAvailable) {
+                fill(255); 
             } else if (!isAvailable) {
                 fill(0);
             }
@@ -610,8 +653,6 @@ function drawPieces() {
 function mousePressed() {
     let x = Math.floor(mouseX / baseSize);
     let y = Math.floor(mouseY / baseSize);
-   // console.log('x: ' + x + ' y: ' + y)
-    //console.log(availableMoves)
     let moveSelected = false;
     let selected = { x: 0, y: 0 };
     for (let i = 0; i < availableMoves.length; i++) {
@@ -663,11 +704,19 @@ function mousePressed() {
                     }
                 }
             }
+            specialMoves = []
+            currentPlayer = currentPlayer == 1 ? 2 : 1;
+            document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer
+            if (checkWin(gameGrid, currentPlayer)){
+                document.getElementById("currentPlayerText").textContent = "Player " + currentPlayer + " wins!";
+                setTimeout(function(){
+                    alert("Player " + currentPlayer + " wins!");
+                }, 100);
+            }
         }
     }
-    if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected) {
+    if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == currentPlayer) {
         availableMoves = gameGrid[y][x].GetMoves();
-        console.log(gameGrid[y][x], "selected")
         for (let j = 0; j < 8; j++) {
             for (let k = 0; k < 8; k++) {
                 if (gameGrid[j][k] != null) {
@@ -678,6 +727,13 @@ function mousePressed() {
         gameGrid[y][x].selected = true;
     }else if (!moveSelected && availableMoves.length > 0){
         availableMoves = []
+        for (let j = 0; j < 8; j++) {
+            for (let k = 0; k < 8; k++) {
+                if (gameGrid[j][k] != null) {
+                    gameGrid[j][k].selected = false;
+                }
+            }
+        }
     }
 }
 
