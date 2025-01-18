@@ -18,7 +18,7 @@ class Pawn extends Piece {
             this.image = loadImage('images/black_pawn.png')
         }
     }
-    GetMoves() {
+    GetMoves(c) {
         let moves = []
         if (this.player == 1) {
             if (gameGrid[this.y + 1][this.x] == null) {
@@ -64,7 +64,9 @@ class Pawn extends Piece {
                 specialMoves.push([this.x - 1, this.y - 1])
             }
         }
-        
+        if(c){
+            moves = removeLostMoves(moves, this.player, this)
+        }
         return moves
     }
 }
@@ -79,7 +81,7 @@ class Rook extends Piece {
             this.image = loadImage('images/black_rook.png')
         }
     }
-    GetMoves() {
+    GetMoves(c) {
         let moves = []
         for (let i = 1; i < 8; i++) {
             if (this.x + i < 8) {
@@ -139,6 +141,9 @@ class Rook extends Piece {
                 specialMoves.push([this.x +2, this.y]);
             }
         }
+        if(c){
+            moves = removeLostMoves(moves, this.player, this)
+        }
         return moves
     }
 }
@@ -154,7 +159,7 @@ class Bishop extends Piece {
         }
     }
 
-    GetMoves() {
+    GetMoves(c) {
         let moves = []
         let temp = true;
         let i = 1;
@@ -224,6 +229,9 @@ class Bishop extends Piece {
                 temp = false;
             }
         }
+        if(c){
+            moves = removeLostMoves(moves, this.player, this)
+        }
         return moves;
     }
 
@@ -240,7 +248,7 @@ class Knight extends Piece {
             this.image = loadImage('images/black_horse.png');
         }
     }
-    GetMoves(){
+    GetMoves(c){
         let moves = []
         if (this.x + 2 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +2] == null){
@@ -293,6 +301,9 @@ class Knight extends Piece {
             }else if (gameGrid[this.y -2][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y -2])
             }}
+        if(c){
+            moves = removeLostMoves(moves, this.player, this)
+        }
         return moves
     }
 }
@@ -307,7 +318,7 @@ class King extends Piece {
             this.image = loadImage('images/black_king.png')
         }
     }
-    GetMoves(){
+    GetMoves(c){
         let moves = []
         if (this.x + 1 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +1] == null){
@@ -370,6 +381,28 @@ class King extends Piece {
                 specialMoves.push([this.x -2, this.y]);
             }
         }
+        if(c){
+            let removeMoves = []
+            for (let i = 0; i <8; i++){
+                for (let j = 0; j < 8; j++){
+                    if (gameGrid[i][j] != null && gameGrid[i][j].player != this.player){
+                        removeMoves.push(gameGrid[i][j].GetMoves(false));
+                        if (gameGrid[i][j].type == "Pawn"){
+                            removeMoves[removeMoves.length -1].push([gameGrid[i][j].x, gameGrid[i][j].y]);
+                        }
+                    }
+                }
+            }
+            for (let i = 0; i < removeMoves.length; i++){
+                for (let j = 0; j < removeMoves[i].length; j++){
+                    for (let k = 0; k < moves.length; k++){
+                        if (removeMoves[i][j][0] == moves[k][0] && removeMoves[i][j][1] == moves[k][1]){
+                            moves.splice(k, 1);
+                        }
+                    }
+                }
+            }
+        }
         return moves
     }
 }
@@ -384,7 +417,7 @@ class Queen extends Piece {
             this.image = loadImage('images/black_queen.png')
         }
     }
-    GetMoves(){
+    GetMoves(c){
         let moves = []
         for (let i = 1; i < 8; i++){
             if (this.x + i < 8){
@@ -503,6 +536,9 @@ class Queen extends Piece {
                 temp = false;
             }
         }
+        if(c){
+            moves = removeLostMoves(moves, this.player, this)
+        }
         return moves;
     }
 }
@@ -538,14 +574,71 @@ function resizeCanvasFunc(){
     resizeCanvas(size, size);
     baseSize = height / 8;
 }
+
 window.addEventListener('resize', function () {
     resizeCanvasFunc();
 }
 )
 
+function removeLostMoves(moves, player, movingPiece){
+    let answer = []
+    for (let i = 0; i < moves.length; i++){
+        gameGrid[movingPiece.y][movingPiece.x] = null;
+        let tilePiece = gameGrid[moves[i][1]][moves[i][0]];
+        gameGrid[moves[i][1]][moves[i][0]] = movingPiece;
+        //console.log("moves[i] " + moves[i]);
+        if (checkCheck(gameGrid, player)){
+            gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
+            gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
+            console.log("removed a move because of check");
+            continue;
+        }else{
+            console.log("added a move");
+            answer.push(moves[i]);
+        }
+        gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
+        gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
+    }
+
+    return answer;
+}
+
+function checkCheck(grid, player){ // this might be integrated into checkWin in the future
+    let king = null;
+    console.log("checking for check");
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == player){
+                king = grid[i][j];
+                console.log("king is at ", king.x, king.y)
+            }
+        }
+    }
+    let moves = []
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (grid[i][j] != null && grid[i][j].player != player){
+                moves.push(grid[i][j].GetMoves(false));
+                if (grid[i][j].type == "Pawn"){
+                    moves[moves.length -1].push([grid[i][j].x, grid[i][j].y]);
+                }
+            }
+        }
+    }
+    for (let i = 0; i < moves.length; i++){
+        for (let j = 0; j < moves[i].length; j++){
+            if (moves[i][j][0] == king.x && moves[i][j][1] == king.y){
+                console.log("check");
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function checkWin(grid, player){
     let king = null;
-    //console.log(player + " player");
+    let checkingPiece = null;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == player){
@@ -554,35 +647,44 @@ function checkWin(grid, player){
         }
     }
     let moves = []
-    let kingMoves = king.GetMoves();
-    //console.log("player " + player);
+    let kingMoves = king.GetMoves(true);
     kingMoves.push([king.x, king.y]);
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player != player){
-                moves.push(gameGrid[i][j].GetMoves());
+                let currentAddedMoves = [];
+                currentAddedMoves.push(gameGrid[i][j].GetMoves(false));
                 if (gameGrid[i][j].type == "Pawn"){
-                    moves[moves.length - 1].push([gameGrid[i][j].x, gameGrid[i][j].y]);
+                    currentAddedMoves[currentAddedMoves.length -1].push([gameGrid[i][j].x, gameGrid[i][j].y]);
                 }
-                //if (gameGrid[i][j].type == "Queen"){
-                    //console.log("queen moves " + gameGrid[i][j].GetMoves());
-                //}
+                for (let k = 0; k < currentAddedMoves.length; k++){
+                    for (let l = 0; l < currentAddedMoves[k].length; l++){
+                        for (let m = 0; m < kingMoves.length; m++){
+                            if (currentAddedMoves[k][l][0] == kingMoves[m][0] && currentAddedMoves[k][l][1] == kingMoves[m][1]){
+                                checkingPiece = gameGrid[i][j];
+                            }
+                        }
+                    }
+                }
+                moves.push(currentAddedMoves);
             }
         }
     }
-    //console.log("moves lenght " + moves.length);
-    for (let i = 0; i < moves.length; i++){
-        for (let j = 0; j < moves[i].length; j++){
-            for (let k = 0; k < kingMoves.length; k++){
-                if (moves[i][j][0] == kingMoves[k][0] && moves[i][j][1] == kingMoves[k][1]){
-                    kingMoves.splice(k, 1);
+    if (checkingPiece != null){
+        let cMoves = []
+        cMoves = checkingPiece.GetMoves(false);
+        for (let i = 0; i < cMoves.length; i++){
+            for (let j = 0; j < kingMoves.length; j++){
+                if (cMoves[i][0] == kingMoves[j][0] && cMoves[i][1] == kingMoves[j][1]){
+                    kingMoves.splice(j, 1);
                 }
             }
         }
     }
     console.log("kingMoves " + kingMoves);
     if (kingMoves.length == 0){
-        return true;
+        //checking if the piece that is attacking the king can be taken or blocked will have to be added later here
+        
     }
     return false;
 }
@@ -716,7 +818,8 @@ function mousePressed() {
         }
     }
     if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == currentPlayer) {
-        availableMoves = gameGrid[y][x].GetMoves();
+        availableMoves = gameGrid[y][x].GetMoves(true);
+        //console.log(availableMoves.length, "available moves length");
         for (let j = 0; j < 8; j++) {
             for (let k = 0; k < 8; k++) {
                 if (gameGrid[j][k] != null) {
@@ -725,7 +828,8 @@ function mousePressed() {
             }
         }
         gameGrid[y][x].selected = true;
-    }else if (!moveSelected && availableMoves.length > 0){
+    }else if (!moveSelected && availableMoves.length >= 0){
+        //console.log("resetting available moves");
         availableMoves = []
         for (let j = 0; j < 8; j++) {
             for (let k = 0; k < 8; k++) {
