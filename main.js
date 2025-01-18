@@ -564,8 +564,80 @@ for (let i = 0; i < 8; i++) {
 
 let availableMoves = []
 let specialMoves = []
-let currentPlayer = 1;
+let currentPlayer = "white"
 let baseSize = 0;
+let moveHistory = []
+let historyOffset = 0;
+let enemy = "player"
+
+function Undo(){
+    //console.log(moveHistory.length + " length");
+    if (moveHistory.length - historyOffset > 1){
+        historyOffset++;
+        if (moveHistory.length - historyOffset < 0){
+            historyOffset--;
+            return;
+        }
+        for (let i = 0; i < 8; i++){
+            for (let j = 0; j < 8; j++){
+                let t = moveHistory.length - historyOffset - 1;
+                //console.log("t " + t)
+                //console.log("history " + typeof(moveHistory[t][0][i][j]))
+                if (moveHistory[t][0][i][j] != null){
+                    gameGrid[i][j] = moveHistory[t][0][i][j];
+                    gameGrid[i][j].x = j;
+                    gameGrid[i][j].y = i;
+                }else{
+                    gameGrid[i][j] = null;
+                }
+            }
+        }
+        moveHistory[moveHistory.length - historyOffset][1].numMoves--;
+        //console.log("num moves " + moveHistory[moveHistory.length - historyOffset][1].numMoves)
+        //console.log("type " + moveHistory[moveHistory.length - historyOffset][1].type)
+        //console.log("undoed")
+        currentPlayer = currentPlayer == "white" ? "black" : "white";
+        document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+    }
+}
+
+function Redo(){
+    console.log(moveHistory.length + " length");
+    if (historyOffset > 0){
+        historyOffset--;
+        if (moveHistory.length - historyOffset < 0){
+            historyOffset++;
+            return;
+        }
+        for (let i = 0; i < 8; i++){
+            for (let j = 0; j < 8; j++){
+                let t = moveHistory.length - historyOffset - 1;
+                if (moveHistory[t][0][i][j] != null){
+                    gameGrid[i][j] = moveHistory[t][0][i][j];
+                    gameGrid[i][j].x = j;
+                    gameGrid[i][j].y = i;
+                }else{
+                    gameGrid[i][j] = null;
+                }
+            }
+        }
+        try{
+            moveHistory[moveHistory.length - historyOffset - 1][1].numMoves++;
+            //console.log("num moves " + moveHistory[moveHistory.length - historyOffset - 1][1].numMoves)
+        } catch{}
+        currentPlayer = currentPlayer == "white" ? "black" : "white";
+        document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+    }
+}
+
+function changeMode(){
+    if (document.getElementById("btnradio1").checked){
+        enemy = "player";
+    }else{
+        enemy = "ai";
+    }
+    console.log("changing mode to " + enemy);
+}
 
 function resizeCanvasFunc(){
     width = document.getElementById('chessboard').offsetWidth;
@@ -639,9 +711,10 @@ function checkCheck(grid, player){ // this might be integrated into checkWin in 
 function checkWin(grid, player){
     let king = null;
     let checkingPiece = null;
+    let nP = player == "white" ? 1 : 2;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
-            if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == player){
+            if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == nP){
                 king = grid[i][j];
             }
         }
@@ -651,7 +724,7 @@ function checkWin(grid, player){
     kingMoves.push([king.x, king.y]);
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null && gameGrid[i][j].player != player){
+            if (gameGrid[i][j] != null && gameGrid[i][j].player != nP){
                 let currentAddedMoves = [];
                 currentAddedMoves.push(gameGrid[i][j].GetMoves(false));
                 if (gameGrid[i][j].type == "Pawn"){
@@ -683,15 +756,57 @@ function checkWin(grid, player){
     }
     console.log("kingMoves " + kingMoves);
     if (kingMoves.length == 0){
-        //checking if the piece that is attacking the king can be taken or blocked will have to be added later here
-        
+        console.log("-------------------------------------no king moves");
+        for (let i = 0; i < 8; i++){
+            for (let j = 0; j < 8; j++){
+                if (gameGrid[i][j] != null && gameGrid[i][j].player == nP){
+                    let moves = gameGrid[i][j].GetMoves(true);
+                    for (let k = 0; k < moves.length; k++){
+                        let tempPiece = gameGrid[i][j];
+                        gameGrid[moves[k][1]][moves[k][0]] = gameGrid[i][j];
+                        gameGrid[i][j] = null;
+                        if (!checkCheck(gameGrid, nP)){
+                            console.log("-------------------------game is not over");
+                            gameGrid[tempPiece.y][tempPiece.x] = tempPiece;
+                            gameGrid[moves[k][1]][moves[k][0]] = null;
+                            return false;
+                        }
+                        gameGrid[tempPiece.y][tempPiece.x] = tempPiece;
+                        gameGrid[i][j] = gameGrid[moves[k][1]][moves[k][0]];
+                        gameGrid[moves[k][1]][moves[k][0]] = null;
+                    }
+                }
+            }
+        }
+        console.log("-------------------------game is over");
+        return true;
     }
     return false;
 }
 
+function updateHistory(lastMovedPiece){
+    let temp = []
+    for (let i = 0; i < 8; i++){
+        temp.push([]);
+        for (let j = 0; j < 8; j++){
+            if (gameGrid[i][j] != null){
+                temp[i].push(gameGrid[i][j]);
+            }else{
+                temp[i].push(null);
+            }
+        }
+    }
+    if (historyOffset > 0){
+        moveHistory.splice(moveHistory.length - historyOffset, historyOffset);
+        historyOffset = 0;
+    }
+    moveHistory.push([temp, lastMovedPiece]);
+}
+
 function resetGame(){
     gameGrid = []
-    currentPlayer = 1;
+    moveHistory = []
+    currentPlayer = "white";
     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     availableMoves = [];
     specialMoves = [];
@@ -708,6 +823,7 @@ function resetGame(){
             }
         }
     }
+    updateHistory(null);
 }
 
 function setup() {
@@ -807,7 +923,7 @@ function mousePressed() {
                 }
             }
             specialMoves = []
-            currentPlayer = currentPlayer == 1 ? 2 : 1;
+            currentPlayer = currentPlayer == "white" ? "black": "white";
             document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer
             if (checkWin(gameGrid, currentPlayer)){
                 document.getElementById("currentPlayerText").textContent = "Player " + currentPlayer + " wins!";
@@ -815,9 +931,12 @@ function mousePressed() {
                     alert("Player " + currentPlayer + " wins!");
                 }, 100);
             }
+            updateHistory(gameGrid[y][x]);
+            //console.log("moveHistory " +moveHistory)
         }
     }
-    if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == currentPlayer) {
+    let nP = currentPlayer == "white" ? 1 : 2;
+    if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == nP) {
         availableMoves = gameGrid[y][x].GetMoves(true);
         //console.log(availableMoves.length, "available moves length");
         for (let j = 0; j < 8; j++) {
