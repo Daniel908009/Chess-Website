@@ -9,10 +9,10 @@ class Piece {
 }
 
 class Pawn extends Piece {
-    constructor(x, y, image) {
+    constructor(x, y, image, imageBool) {
         super(x, y, image)
         this.type = 'Pawn'
-        if (this.player == 1) {
+        if (this.player == 1 && imageBool) {
             this.image = loadImage('images/pawn.png')
         } else {
             this.image = loadImage('images/black_pawn.png')
@@ -78,10 +78,10 @@ class Pawn extends Piece {
 }
 
 class Rook extends Piece {
-    constructor(x, y, image) {
+    constructor(x, y, image, imageBool) {
         super(x, y, image)
         this.type = "Rook"
-        if (this.player == 1) {
+        if (this.player == 1 && imageBool) {
             this.image = loadImage('images/rook.png')
         } else {
             this.image = loadImage('images/black_rook.png')
@@ -155,10 +155,10 @@ class Rook extends Piece {
 }
 
 class Bishop extends Piece {
-    constructor(x, y, image) {
+    constructor(x, y, image, imageBool) {
         super(x, y, image)
         this.type = "Bishop"
-        if (this.player == 1) {
+        if (this.player == 1 && imageBool) {
             this.image = loadImage('images/bishop.png')
         } else {
             this.image = loadImage('images/black_bishop.png')
@@ -244,10 +244,10 @@ class Bishop extends Piece {
 }
 
 class Knight extends Piece {
-    constructor(x, y, image){
+    constructor(x, y, image, imageBool){
         super(x, y, image);
         this.type = "Knight";
-        if (this.player == 1){
+        if (this.player == 1 && imageBool){
             this.image = loadImage('images/horse.png');
         }
         else{
@@ -315,10 +315,10 @@ class Knight extends Piece {
 }
 
 class King extends Piece {
-    constructor(x, y, image){
+    constructor(x, y, image, imageBool){
         super(x, y, image);
         this.type = "King";
-        if (this.player == 1){
+        if (this.player == 1 && imageBool){
             this.image = loadImage('images/king.png')
         }else{
             this.image = loadImage('images/black_king.png')
@@ -414,10 +414,10 @@ class King extends Piece {
 }
 
 class Queen extends Piece {
-    constructor(x, y, image){
+    constructor(x, y, image, imageBool){
         super(x, y, image);
         this.type = "Queen";
-        if (this.player == 1){
+        if (this.player == 1 && imageBool){
             this.image = loadImage('images/queen.png')
         }else{
             this.image = loadImage('images/black_queen.png')
@@ -669,90 +669,113 @@ function findBestMove(scores){
     return bestMove;
 }
 
-function recursiveFunc(grid, scores, player, depth, desiredDepth, x){
+let controlVariable = 0;
+
+function recursiveFunc(grid, scores, player, depth, desiredDepth){
     //console.log("score " + scores);
     //console.log(typeof(scores));
     let nP = player == "white" ? 1 : 2;
     //console.log(nP)
     //console.log("current player " + player);
-    console.log("--------------------------------")
+    console.log("--------------jffjgfjffjgjffggfgjgjfgjjjf------------------")
     console.log(grid)
     let cPGrid = []
     for (let i = 0; i < 8; i++){
         cPGrid.push([]);
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null){
-                cPGrid[i].push(grid[i][j]);
-                //cPGrid[i][j].numMoves = grid[i][j].numMoves;
-                //cPGrid[i][j].player = grid[i][j].player;
-            }else{
+                cPGrid[i].push(new grid[i][j].constructor(grid[i][j].x, grid[i][j].y, grid[i][j].player, false));
+                console.log("Created " + cPGrid[i][j].type + " at " + cPGrid[i][j].x + " " + cPGrid[i][j].y)
+            }
+            else{
                 cPGrid[i].push(null);
             }
         }
     }
+    //cPGrid[0][0] = cPGrid[1][0];
     //console.log(cPGrid)
+    //return scores;
+    console.log("[[[[[[[[[[[[[[[[[[[[[[[")
+    console.log(cPGrid)
     let allMoveOptions = []
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player == nP){
                 let moves = grid[i][j].GetMoves(false);
                 //console.log("this ran")
-                allMoveOptions.push([cPGrid[i][j], moves]);
+                if (moves.length != 0){
+                    allMoveOptions.push([cPGrid[i][j], moves]);
+                }
             }
         }
     }
-    //console.log("all move options " + allMoveOptions);
+    console.log("pppppppppppppppppppppppppp")
+    console.log(allMoveOptions);
     if (allMoveOptions.length == 0){
-        //console.log("no moves left");
         return 0;
     }
-    //console.log(cPGrid)
     for (let i =0; i < allMoveOptions.length; i++){
+        console.log(allMoveOptions[i])
+        let originalX = allMoveOptions[i][0].x;
+        let originalY = allMoveOptions[i][0].y;
+        console.log(originalX, originalY)
+        console.log(cPGrid[originalY][originalX])
+        console.log("original " + cPGrid[originalY][originalX].type)
         for (let j = 0; j < allMoveOptions[i][1].length; j++){
+            controlVariable++;
+            console.log("move of " + allMoveOptions[i][0].type + " ran")
             let impossibleMove = false;
             cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]] = cPGrid[allMoveOptions[i][0].y][allMoveOptions[i][0].x];
-            cPGrid[allMoveOptions[i][0].y][allMoveOptions[i][0].x] = null;
-            //console.log("moved " + movingPiece.type + " to " + allMoveOptions[i][1][j][0] + " " + allMoveOptions[i][1][j][1])
-            //cPGrid[6][0] = null;
-            /*console.log(movingPiece.type, movingPiece.x, movingPiece.y)
-            cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]] = movingPiece;
-            console.log("cPgrid at destination " + cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]])
-            console.log(allMoveOptions[i][1][j][0], allMoveOptions[i][1][j][1])
-            cPGrid[movingPiece.y][movingPiece.x] = null;
-            console.log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
-            console.log(movingPiece.x, movingPiece.y)
-            console.log(cPGrid[movingPiece.y][movingPiece.x])
-            console.log(cPGrid)
-            console.log("moved " + movingPiece.type + " to " + allMoveOptions[i][1][j][0] + " " + allMoveOptions[i][1][j][1])
-            */
-            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-            console.log(cPGrid)
-            
+            cPGrid[originalY][originalX] = null;
+            /*console.log(" --------------------------------------------kkkkkkkkkkkkkkkkkkkkk")
+            console.log("grids")
+            console.log(grid)
+            console.log(cPGrid)*/
+            let newX = allMoveOptions[i][1][j][0];
+            console.log(originalY, originalX)
+            let newY = allMoveOptions[i][1][j][1];
+            console.log(newY, newX)
+            if (cPGrid[newY][newX] == null){
+                console.log(cPGrid)
+                console.log(allMoveOptions[i][1])
+                console.log(allMoveOptions[i][0])
+                //console.log(cPGrid[originalY][originalX].type)
+            }
+            cPGrid[newY][newX].x = newX;
+            cPGrid[newY][newX].y = newY;
             let enemyPlayer = player == "white" ? "black" : "white";
             if (checkCheck(cPGrid, nP)){
-                scores[x][2] = -1000000000;
+                scores[i][2] -= 10000000000000;
                 impossibleMove = true;
                 console.log("impossibleMove at depth++++++++++++++++++++ "+depth)
-                console.log(cPGrid)
-                console.log("moved " + movingPiece.type + " to " + movingPiece.x + " " + movingPiece.y)
             } else if (checkWin(cPGrid, enemyPlayer)){
-                scores[x][2] += 100;
+                scores[i][2] += 1000;
             }
             if (depth < desiredDepth && impossibleMove == false){
-                console.log("-------------moveHere-------------")
-                console.log(cPGrid)
-                scores[x][2] = recursiveFunc(cPGrid, scores, enemyPlayer, depth +1, desiredDepth, x);
+                scores = recursiveFunc(cPGrid, scores, enemyPlayer, depth + 1, desiredDepth);
                 console.log("depth is " + depth);
             }
-            cPGrid[originalY][originalX] = cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]];
-            cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]] = null;
-            
-            //console.log(movingPiece.x, movingPiece.y)
-            //console.log(cPGrid)
-            return 0;
+            console.log("end of some moves reached")
+            console.log(cPGrid)
+            cPGrid[originalY][originalX] = cPGrid[newY][newX];
+            cPGrid[newY][newX] = null;
+            cPGrid[originalY][originalX].x = originalX;
+            cPGrid[originalY][originalX].y = originalY;
+            console.log(cPGrid)
+        }
+        cPGrid = []
+        for (let i = 0; i < 8; i++){
+            cPGrid.push([]);
+            for (let j = 0; j < 8; j++){
+                if (grid[i][j] != null){
+                    cPGrid[i].push(new grid[i][j].constructor(grid[i][j].x, grid[i][j].y, grid[i][j].player, false));
+                }else{
+                    cPGrid[i].push(null);
+                }
+            }
         }
     }
-    return scores[x][2];
+    return scores;
 }
 
 function makeMove(move){
@@ -769,7 +792,7 @@ function makeMove(move){
 function enemyDecision(){
     let bestMove = []
     let scores = []
-    let desiredDepth = 0;
+    let desiredDepth = 1;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player == 2){
@@ -795,11 +818,8 @@ function enemyDecision(){
         }
     }
     //console.log("image " + gameGrid[scores[0][0]][scores[0][1]].image)
-    for (let i = 0; i < scores.length; i++){
-        console.log("new recursion started")
-        scores[i][2] = recursiveFunc(cPGrid, scores, "black", 0, desiredDepth, i);
-        break;
-    }
+    scores = recursiveFunc(cPGrid, scores, "black", 0, desiredDepth);
+    console.log(controlVariable + " control variable")
     //console.log(gameGrid)
     //return;
     /*for (let i = 0; i < 8; i++){
@@ -1000,7 +1020,7 @@ function resetGame(){
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
             if (gameGridLayout[y][x] != null) {
-                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1]);
+                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1], false);
             }
         }
     }
