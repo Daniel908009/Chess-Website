@@ -14,7 +14,7 @@ class Pawn extends Piece {
         this.type = 'Pawn'
         if (this.player == 1 && imageBool) {
             this.image = loadImage('images/pawn.png')
-        } else {
+        } else if (imageBool) {
             this.image = loadImage('images/black_pawn.png')
         }
     }
@@ -83,7 +83,7 @@ class Rook extends Piece {
         this.type = "Rook"
         if (this.player == 1 && imageBool) {
             this.image = loadImage('images/rook.png')
-        } else {
+        } else if (imageBool) {
             this.image = loadImage('images/black_rook.png')
         }
     }
@@ -160,7 +160,7 @@ class Bishop extends Piece {
         this.type = "Bishop"
         if (this.player == 1 && imageBool) {
             this.image = loadImage('images/bishop.png')
-        } else {
+        } else if (imageBool) {
             this.image = loadImage('images/black_bishop.png')
         }
     }
@@ -250,7 +250,7 @@ class Knight extends Piece {
         if (this.player == 1 && imageBool){
             this.image = loadImage('images/horse.png');
         }
-        else{
+        else if (imageBool){
             this.image = loadImage('images/black_horse.png');
         }
     }
@@ -320,7 +320,7 @@ class King extends Piece {
         this.type = "King";
         if (this.player == 1 && imageBool){
             this.image = loadImage('images/king.png')
-        }else{
+        }else if (imageBool){
             this.image = loadImage('images/black_king.png')
         }
     }
@@ -419,7 +419,7 @@ class Queen extends Piece {
         this.type = "Queen";
         if (this.player == 1 && imageBool){
             this.image = loadImage('images/queen.png')
-        }else{
+        }else if (imageBool){
             this.image = loadImage('images/black_queen.png')
         }
     }
@@ -643,7 +643,6 @@ function changeMode(){
         enemy = "bot";
     }
     resetGame();
-    //console.log("changing mode to " + enemy);
 }
 
 function findBestMove(scores){
@@ -656,13 +655,9 @@ function findBestMove(scores){
         }
         
     }
-    //console.log("best move " + bestMove);
-    //console.log("best move length " + bestMove.length);
-    //console.log("score length " + scores.length)
     console.log("best score " + bestScore);
     if (bestScore == 0){
         let rand = Math.floor(Math.random() * scores.length);
-        //console.log("random " + rand)
         bestMove = [scores[rand][0], scores[rand][1], scores[rand][3], scores[rand][4]];
     }
     
@@ -671,111 +666,60 @@ function findBestMove(scores){
 
 let controlVariable = 0;
 
-function recursiveFunc(grid, scores, player, depth, desiredDepth){
-    //console.log("score " + scores);
-    //console.log(typeof(scores));
+function recursiveFunc(grid, player, depth, desiredDepth, scorePos){
     let nP = player == "white" ? 1 : 2;
-    //console.log(nP)
-    //console.log("current player " + player);
-    console.log("--------------jffjgfjffjgjffggfgjgjfgjjjf------------------")
-    console.log(grid)
     let cPGrid = []
     for (let i = 0; i < 8; i++){
         cPGrid.push([]);
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null){
-                cPGrid[i].push(new grid[i][j].constructor(grid[i][j].x, grid[i][j].y, grid[i][j].player, false));
-                console.log("Created " + cPGrid[i][j].type + " at " + cPGrid[i][j].x + " " + cPGrid[i][j].y)
+                cPGrid[i].push([grid[i][j].x , grid[i][j].y, grid[i][j].type, grid[i][j].player, grid[i][j].numMoves]);
             }
             else{
                 cPGrid[i].push(null);
             }
         }
     }
-    //cPGrid[0][0] = cPGrid[1][0];
-    //console.log(cPGrid)
-    //return scores;
-    console.log("[[[[[[[[[[[[[[[[[[[[[[[")
-    console.log(cPGrid)
     let allMoveOptions = []
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player == nP){
                 let moves = grid[i][j].GetMoves(false);
-                //console.log("this ran")
                 if (moves.length != 0){
-                    allMoveOptions.push([cPGrid[i][j], moves]);
+                    allMoveOptions.push([grid[i][j], moves]);
                 }
             }
         }
     }
-    console.log("pppppppppppppppppppppppppp")
-    console.log(allMoveOptions);
     if (allMoveOptions.length == 0){
-        return 0;
+        return 1;
     }
     for (let i =0; i < allMoveOptions.length; i++){
-        console.log(allMoveOptions[i])
         let originalX = allMoveOptions[i][0].x;
         let originalY = allMoveOptions[i][0].y;
-        console.log(originalX, originalY)
-        console.log(cPGrid[originalY][originalX])
-        console.log("original " + cPGrid[originalY][originalX].type)
+        let pieceInPosition = grid[allMoveOptions[i][1][0][1]][allMoveOptions[i][1][0][0]];
         for (let j = 0; j < allMoveOptions[i][1].length; j++){
             controlVariable++;
-            console.log("move of " + allMoveOptions[i][0].type + " ran")
             let impossibleMove = false;
-            cPGrid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]] = cPGrid[allMoveOptions[i][0].y][allMoveOptions[i][0].x];
-            cPGrid[originalY][originalX] = null;
-            /*console.log(" --------------------------------------------kkkkkkkkkkkkkkkkkkkkk")
-            console.log("grids")
-            console.log(grid)
-            console.log(cPGrid)*/
+            grid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]] = grid[allMoveOptions[i][0].y][allMoveOptions[i][0].x];
+            grid[originalY][originalX] = null;
             let newX = allMoveOptions[i][1][j][0];
-            console.log(originalY, originalX)
             let newY = allMoveOptions[i][1][j][1];
-            console.log(newY, newX)
-            if (cPGrid[newY][newX] == null){
-                console.log(cPGrid)
-                console.log(allMoveOptions[i][1])
-                console.log(allMoveOptions[i][0])
-                //console.log(cPGrid[originalY][originalX].type)
-            }
-            cPGrid[newY][newX].x = newX;
-            cPGrid[newY][newX].y = newY;
+            grid[newY][newX].x = newX;
+            grid[newY][newX].y = newY;
             let enemyPlayer = player == "white" ? "black" : "white";
-            if (checkCheck(cPGrid, nP)){
-                scores[i][2] -= 10000000000000;
-                impossibleMove = true;
-                console.log("impossibleMove at depth++++++++++++++++++++ "+depth)
-            } else if (checkWin(cPGrid, enemyPlayer)){
-                scores[i][2] += 1000;
+            if (checkWin(grid, enemyPlayer)){
+                //something will have to be here
+                return 1000;
             }
             if (depth < desiredDepth && impossibleMove == false){
-                scores = recursiveFunc(cPGrid, scores, enemyPlayer, depth + 1, desiredDepth);
-                console.log("depth is " + depth);
+                scores = recursiveFunc(grid, enemyPlayer, depth + 1, desiredDepth, scorePos);
             }
-            console.log("end of some moves reached")
-            console.log(cPGrid)
-            cPGrid[originalY][originalX] = cPGrid[newY][newX];
-            cPGrid[newY][newX] = null;
-            cPGrid[originalY][originalX].x = originalX;
-            cPGrid[originalY][originalX].y = originalY;
-            console.log(cPGrid)
+            //reseting grid here
         }
-        cPGrid = []
-        for (let i = 0; i < 8; i++){
-            cPGrid.push([]);
-            for (let j = 0; j < 8; j++){
-                if (grid[i][j] != null){
-                    cPGrid[i].push(new grid[i][j].constructor(grid[i][j].x, grid[i][j].y, grid[i][j].player, false));
-                }else{
-                    cPGrid[i].push(null);
-                }
-            }
-        }
+        //reseting grid here
     }
-    return scores;
+    return 1;
 }
 
 function makeMove(move){
@@ -786,13 +730,41 @@ function makeMove(move){
     gameGrid[movingPiece.y][movingPiece.x] = null;
     movingPiece.x = move[2];
     movingPiece.y = move[3];
+    movingPiece.numMoves++;
     //console.log("new possition " + movingPiece.x, movingPiece.y);
 }
 
+function test(grid, piece, destination){
+    grid[destination[1]][destination[0]] = "piece;"
+    //grid[destination[1]][destination[0]].x = destination[0];
+    //grid[destination[1]][destination[0]].y = destination[1];
+    grid[piece.y][piece.x] = null;
+    return grid;
+}
+function testFunc(grid, player, depth, desiredDepth, scorePos){
+    let cGrid = [...grid];
+    let piece = [...cGrid[0]][0]
+    console.log(piece)
+    cGrid[1][1] = piece;
+    //cGrid[1][1].x = 1;
+    //cGrid[1][1].y = 1;
+    cGrid[0].splice(0, 1);
+
+    console.log(cGrid);
+    console.log("something happpening here")
+    //cGrid = test(cGrid, piece, [0, 0]);
+    //cGrid[0][0] = piece;
+    //cGrid[1][1] = null;
+    cGrid[0].splice(0, 0, piece);
+    console.log(cGrid);
+}
+
+let scores = []
 function enemyDecision(){
+    console.log(gameGrid)
     let bestMove = []
-    let scores = []
-    let desiredDepth = 1;
+    let desiredDepth = 0;
+    scores = []
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player == 2){
@@ -800,36 +772,46 @@ function enemyDecision(){
                 for (let k = 0; k < moves.length; k++){
                     scores.push([i, j, 0, moves[k][0], moves[k][1]]);
                 }
-        }
+            }
         }
     }
     console.log("-----------------------------------------------")
     console.log(scores);
-    //console.log(gameGrid[0][0].image)
-    cPGrid = []
+    let gameGridCopy = []
     for (let i = 0; i < 8; i++){
-        cPGrid.push([]);
+        gameGridCopy.push([]);
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null){
-                cPGrid[i].push(gameGrid[i][j]);
+                gameGridCopy[i].push(new gameGrid[i][j].constructor(gameGrid[i][j].x, gameGrid[i][j].y, gameGrid[i][j].player, false));
             }else{
-                cPGrid[i].push(null);
+                gameGridCopy[i].push(null);
             }
         }
     }
-    //console.log("image " + gameGrid[scores[0][0]][scores[0][1]].image)
-    scores = recursiveFunc(cPGrid, scores, "black", 0, desiredDepth);
-    console.log(controlVariable + " control variable")
-    //console.log(gameGrid)
-    //return;
-    /*for (let i = 0; i < 8; i++){
+    testFunc(gameGridCopy, "black", 0, desiredDepth, 0);
+    /*
+    for (let i = 0; i < scores.length; i++){
+        let movingPiece = gameGridCopy[scores[i][0]][scores[i][1]];
+        gameGridCopy[scores[i][3]][scores[i][4]] = movingPiece;
+        gameGridCopy[movingPiece.y][movingPiece.x] = null;
+        movingPiece.x = scores[i][3];
+        movingPiece.y = scores[i][4];
+        movingPiece.numMoves++;
+        recursiveFunc(gameGridCopy, "black", 0, desiredDepth, i);
+        gameGridCopy = []
         for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null){
-                console.log("type " + gameGrid[i][j].type)
-                console.log("image " + gameGrid[i][j].image)
+            gameGridCopy[j].push([]);
+            for (let k = 0; k < 8; k++){
+                if (gameGrid[j][k] != null){
+                    gameGridCopy[j][k] = new gameGrid[j][k].constructor(gameGrid[j][k].x, gameGrid[j][k].y, gameGrid[j][k].player, false);
+                }
+                else{
+                    gameGridCopy[j][k] = null;
+                }
             }
         }
     }*/
+    console.log(controlVariable + " control variable")
     bestMove = findBestMove(scores);
     makeMove(bestMove);
     updateHistory()
@@ -1020,10 +1002,11 @@ function resetGame(){
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
             if (gameGridLayout[y][x] != null) {
-                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1], false);
+                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1], true);
             }
         }
     }
+    //console.log(gameGrid)
     updateHistory(null);
 }
 
@@ -1074,6 +1057,7 @@ function drawPieces() {
 }
 
 function mousePressed() {
+    console.log(gameGrid)
     let x = Math.floor(mouseX / baseSize);
     let y = Math.floor(mouseY / baseSize);
     let moveSelected = false;
