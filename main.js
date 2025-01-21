@@ -609,7 +609,7 @@ let currentPlayer = "white"
 let baseSize = 0;
 let moveHistory = []
 let historyOffset = 0;
-let enemy = "bot"
+let enemy = "player"
 
 function Undo(){
     //console.log(moveHistory.length + " length");
