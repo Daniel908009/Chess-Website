@@ -640,7 +640,7 @@ let gameGridLayout = [
     [[Rook, 2], [Knight, 2], [Bishop, 2], [Queen, 2], [King, 2], [Bishop, 2], [Knight, 2], [Rook, 2]],
 ]
 // test check
-
+/*
 gameGridLayout = [
     [null, null, null, null, null, null, null, null],
     [null, [King, 1], null, null, null, null, [Rook, 2], null],
@@ -651,7 +651,7 @@ gameGridLayout = [
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 2]],
 ]
-
+*/
 let gameGrid = []
 for (let i = 0; i < 8; i++) {
     gameGrid.push([]);
