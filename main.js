@@ -394,9 +394,28 @@ class King extends Piece {
             for (let i = 0; i <8; i++){
                 for (let j = 0; j < 8; j++){
                     if (gameGrid[i][j] != null && gameGrid[i][j].player != this.player){
-                        removeMoves.push(gameGrid[i][j].GetMoves(false));
-                        if (gameGrid[i][j].type == "Pawn"){
-                            removeMoves[removeMoves.length -1].push([gameGrid[i][j].x, gameGrid[i][j].y]);
+                        if(gameGrid[i][j].type != "Pawn"){
+                            removeMoves.push(gameGrid[i][j].GetMoves(false));
+                        }else{
+                            //console.log("pawn")
+                            let x = gameGrid[i][j].x;
+                            let y = gameGrid[i][j].y;
+                            //console.log(x + " " + y)
+                            if(gameGrid[i][j].player == 1){
+                                if (x + 1 < 8 && y + 1 < 8){
+                                    removeMoves.push([[x +1, y +1]]);
+                                }
+                                if (x - 1 >= 0 && y + 1 < 8){
+                                    removeMoves.push([[x -1, y +1]]);
+                                }
+                            }else{
+                                if (x + 1 < 8 && y - 1 >= 0){
+                                    removeMoves.push([[x +1, y -1]]);
+                                }
+                                if (x - 1 >= 0 && y - 1 >= 0){
+                                    removeMoves.push([[x -1, y -1]]);
+                                }
+                            }
                         }
                     }
                 }
