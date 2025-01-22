@@ -1,142 +1,136 @@
-class Piece {
+class Piece { // parent class of all pieces
     constructor(x, y, player) {
         this.x = x;
         this.y = y;
         this.player = player;
         this.selected = false;
-        this.numMoves = 0
+        this.numMoves = 0;
     }
 }
 
 class Pawn extends Piece {
     constructor(x, y, player) {
-        super(x, y, player)
-        this.type = 'Pawn'
-        this.movedTwoTiles = false;
-        this.value = 1;
+        super(x, y, player);
+        this.type = 'Pawn';
+        this.movedTwoTiles = false; // important for en passant
+        this.value = 1; // needed for the evaluation inside the decision making algorithm
         if (this.player == 1) {
-            this.image = loadImage('images/pawn.png')
+            this.image = loadImage('images/pawn.png');
         } else{
-            this.image = loadImage('images/black_pawn.png')
+            this.image = loadImage('images/black_pawn.png');
         }
     }
-    GetMoves(c) {
-        let moves = []
+    GetMoves(c) { // all classes have this function, it returns all possible moves for the piece
+        let moves = [];
         if (this.player == 1) {
             if (this.y + 1 < 8 && gameGrid[this.y + 1][this.x] == null) {
-                moves.push([this.x, this.y + 1])
+                moves.push([this.x, this.y + 1]);
                 if (this.numMoves == 0 && this.y +2 < 8 && gameGrid[this.y + 2][this.x] == null){
-                    moves.push([this.x, this.y + 2])
+                    moves.push([this.x, this.y + 2]);
                 }
             }
             if (this.x +1 < 8 && this.y +1 < 8 && gameGrid[this.y +1][this.x +1] != null && gameGrid[this.y +1][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y +1])
+                moves.push([this.x +1, this.y +1]);
             }
             if (this.x - 1 >= 0 && this.y +1 < 8 && gameGrid[this.y +1][this.x -1] != null && gameGrid[this.y +1][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y +1])
+                moves.push([this.x -1, this.y +1]);
             }
             if (this.x + 1 < 8 && gameGrid[this.y][this.x + 1] != null && gameGrid[this.y][this.x + 1].player != this.player && gameGrid[this.y][this.x + 1].numMoves == 1 && gameGrid[this.y][this.x + 1].type == "Pawn" && gameGrid[this.y][this.x + 1].movedTwoTiles){
-                moves.push([this.x + 1, this.y + 1])
-                specialMoves.push([this.x + 1, this.y + 1])
-                //console.log(specialMoves)
+                moves.push([this.x + 1, this.y + 1]);
+                specialMoves.push([this.x + 1, this.y + 1]);
             }
             if (this.x - 1 >= 0 && gameGrid[this.y][this.x - 1] != null && gameGrid[this.y][this.x - 1].player != this.player && gameGrid[this.y][this.x - 1].numMoves == 1 && gameGrid[this.y][this.x - 1].type == "Pawn" && gameGrid[this.y][this.x - 1].movedTwoTiles){
-                moves.push([this.x - 1, this.y + 1])
-                specialMoves.push([this.x - 1, this.y + 1])
-                //console.log(specialMoves)
+                moves.push([this.x - 1, this.y + 1]);
+                specialMoves.push([this.x - 1, this.y + 1]);
             }
         }
         else {
             if (this.y -1 >= 0 && gameGrid[this.y -1][this.x] == null){
-                moves.push([this.x, this.y - 1])
+                moves.push([this.x, this.y - 1]);
                 if (this.numMoves == 0 && this.y -2 >= 0 && gameGrid[this.y -2][this.x] == null){
-                    moves.push([this.x, this.y - 2])
+                    moves.push([this.x, this.y - 2]);
                 }
             }
             if (this.y - 1 >= 0 && this.x +1 < 8 && gameGrid[this.y -1][this.x +1] != null && gameGrid[this.y -1][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y -1])
+                moves.push([this.x +1, this.y -1]);
             }
             if (this.y - 1 >= 0 && this.x -1 >= 0 && gameGrid[this.y -1][this.x -1] != null && gameGrid[this.y -1][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y -1])
+                moves.push([this.x -1, this.y -1]);
             }
             if (this.x + 1 < 8 && gameGrid[this.y][this.x + 1] != null && gameGrid[this.y][this.x + 1].player != this.player && gameGrid[this.y][this.x + 1].numMoves == 1 && gameGrid[this.y][this.x + 1].type == "Pawn" && gameGrid[this.y][this.x + 1].movedTwoTiles ){
-                moves.push([this.x + 1, this.y - 1])
-                //console.log("special move 1")
-                //console.log([this.x + 1, this.y ])
-                specialMoves.push([this.x + 1, this.y - 1])
+                moves.push([this.x + 1, this.y - 1]);
+                specialMoves.push([this.x + 1, this.y - 1]);
             }
             if (this.x - 1 >= 0 && gameGrid[this.y][this.x - 1] != null && gameGrid[this.y][this.x - 1].player != this.player && gameGrid[this.y][this.x - 1].numMoves == 1 && gameGrid[this.y][this.x - 1].type == "Pawn" && gameGrid[this.y][this.x - 1].movedTwoTiles){
-                moves.push([this.x - 1, this.y - 1])
-                //console.log("special move 2")
-                //console.log([this.x - 1, this.y])
-                specialMoves.push([this.x -1, this.y -1])
+                moves.push([this.x - 1, this.y - 1]);
+                specialMoves.push([this.x -1, this.y -1]);
             }
         }
-        if(c){
-            moves = removeLostMoves(moves, this.player, this)
+        if(c){ // the c parameter is needed, because otherwise an infinite recursion would happen in some places of the code
+            moves = removeLostMoves(moves, this.player, this);
         }
-        return moves
+        return moves;
     }
 }
 
 class Rook extends Piece {
     constructor(x, y, player) {
-        super(x, y, player)
-        this.type = "Rook"
+        super(x, y, player);
+        this.type = "Rook";
         this.value = 3;
         if (this.player == 1) {
-            this.image = loadImage('images/rook.png')
+            this.image = loadImage('images/rook.png');
         } else {
-            this.image = loadImage('images/black_rook.png')
+            this.image = loadImage('images/black_rook.png');
         }
     }
     GetMoves(c) {
-        let moves = []
+        let moves = [];
         for (let i = 1; i < 8; i++) {
             if (this.x + i < 8) {
                 if (gameGrid[this.y][this.x + i] == null) {
-                    moves.push([this.x + i, this.y])
+                    moves.push([this.x + i, this.y]);
                 } else if (gameGrid[this.y][this.x + i].player != this.player) {
-                    moves.push([this.x + i, this.y])
-                    break
+                    moves.push([this.x + i, this.y]);
+                    break;
                 } else {
-                    break
+                    break;
                 }
             }
         }
         for (let i = 1; i < 8; i++) {
             if (this.x - i >= 0) {
                 if (gameGrid[this.y][this.x - i] == null) {
-                    moves.push([this.x - i, this.y])
+                    moves.push([this.x - i, this.y]);
                 } else if (gameGrid[this.y][this.x - i].player != this.player) {
-                    moves.push([this.x - i, this.y])
-                    break
+                    moves.push([this.x - i, this.y]);
+                    break;
                 } else {
-                    break
+                    break;
                 }
             }
         }
         for (let i = 1; i < 8; i++) {
             if (this.y + i < 8) {
                 if (gameGrid[this.y + i][this.x] == null) {
-                    moves.push([this.x, this.y + i])
+                    moves.push([this.x, this.y + i]);
                 } else if (gameGrid[this.y + i][this.x].player != this.player) {
-                    moves.push([this.x, this.y + i])
-                    break
+                    moves.push([this.x, this.y + i]);
+                    break;
                 } else {
-                    break
+                    break;
                 }
             }
         }
         for (let i = 1; i < 8; i++) {
             if (this.y - i >= 0) {
                 if (gameGrid[this.y - i][this.x] == null) {
-                    moves.push([this.x, this.y - i])
+                    moves.push([this.x, this.y - i]);
                 } else if (gameGrid[this.y - i][this.x].player != this.player) {
-                    moves.push([this.x, this.y - i])
-                    break
+                    moves.push([this.x, this.y - i]);
+                    break;
                 } else {
-                    break
+                    break;
                 }
             }
         }
@@ -151,26 +145,26 @@ class Rook extends Piece {
             }
         }
         if(c){
-            moves = removeLostMoves(moves, this.player, this)
+            moves = removeLostMoves(moves, this.player, this);
         }
-        return moves
+        return moves;
     }
 }
 
 class Bishop extends Piece {
     constructor(x, y, player) {
-        super(x, y, player)
-        this.type = "Bishop"
+        super(x, y, player);
+        this.type = "Bishop";
         this.value = 3;
         if (this.player == 1) {
-            this.image = loadImage('images/bishop.png')
+            this.image = loadImage('images/bishop.png');
         } else {
-            this.image = loadImage('images/black_bishop.png')
+            this.image = loadImage('images/black_bishop.png');
         }
     }
 
     GetMoves(c) {
-        let moves = []
+        let moves = [];
         let temp = true;
         let i = 1;
         while(temp){
@@ -240,7 +234,7 @@ class Bishop extends Piece {
             }
         }
         if(c){
-            moves = removeLostMoves(moves, this.player, this)
+            moves = removeLostMoves(moves, this.player, this);
         }
         return moves;
     }
@@ -260,62 +254,62 @@ class Knight extends Piece {
         }
     }
     GetMoves(c){
-        let moves = []
+        let moves = [];
         if (this.x + 2 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +2] == null){
-                moves.push([this.x +2, this.y +1])
+                moves.push([this.x +2, this.y +1]);
             }else if (gameGrid[this.y +1][this.x +2].player != this.player){
-                moves.push([this.x +2, this.y +1])
+                moves.push([this.x +2, this.y +1]);
             }}
         if (this.x - 2 >= 0 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x -2] == null){
-                moves.push([this.x -2, this.y +1])
+                moves.push([this.x -2, this.y +1]);
             }else if (gameGrid[this.y +1][this.x -2].player != this.player){
-                moves.push([this.x -2, this.y +1])
+                moves.push([this.x -2, this.y +1]);
             }
         }
         if (this.x +2 < 8 && this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x +2] == null){
-                moves.push([this.x +2, this.y -1])
+                moves.push([this.x +2, this.y -1]);
             }else if (gameGrid[this.y -1][this.x +2].player != this.player){
-                moves.push([this.x +2, this.y -1])
+                moves.push([this.x +2, this.y -1]);
             }
         }
         if (this.x - 2 >= 0 && this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x -2] == null){
-                moves.push([this.x -2, this.y -1])
+                moves.push([this.x -2, this.y -1]);
             }else if (gameGrid[this.y -1][this.x -2].player != this.player){
-                moves.push([this.x -2, this.y -1])
+                moves.push([this.x -2, this.y -1]);
             }
         }
         if (this.y + 2 < 8 && this.x + 1 < 8){
             if (gameGrid[this.y +2][this.x +1] == null){
-                moves.push([this.x +1, this.y +2])
+                moves.push([this.x +1, this.y +2]);
             }else if (gameGrid[this.y +2][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y +2])
+                moves.push([this.x +1, this.y +2]);
             }}
         if (this.y + 2 < 8 && this.x - 1 >= 0){
             if (gameGrid[this.y +2][this.x -1] == null){
-                moves.push([this.x -1, this.y +2])
+                moves.push([this.x -1, this.y +2]);
             }else if (gameGrid[this.y +2][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y +2])
+                moves.push([this.x -1, this.y +2]);
             }}
         if (this.y - 2 >= 0 && this.x + 1 < 8){
             if (gameGrid[this.y -2][this.x +1] == null){
-                moves.push([this.x +1, this.y -2])
+                moves.push([this.x +1, this.y -2]);
             }else if (gameGrid[this.y -2][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y -2])
+                moves.push([this.x +1, this.y -2]);
             }}
         if (this.y - 2 >= 0 && this.x - 1 >= 0){
             if (gameGrid[this.y -2][this.x -1] == null){
-                moves.push([this.x -1, this.y -2])
+                moves.push([this.x -1, this.y -2]);
             }else if (gameGrid[this.y -2][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y -2])
+                moves.push([this.x -1, this.y -2]);
             }}
         if(c){
-            moves = removeLostMoves(moves, this.player, this)
+            moves = removeLostMoves(moves, this.player, this);
         }
-        return moves
+        return moves;
     }
 }
 
@@ -325,63 +319,63 @@ class King extends Piece {
         this.type = "King";
         this.value = 5;
         if (this.player == 1){
-            this.image = loadImage('images/king.png')
+            this.image = loadImage('images/king.png');
         }else{
-            this.image = loadImage('images/black_king.png')
+            this.image = loadImage('images/black_king.png');
         }
     }
     GetMoves(c){
-        let moves = []
+        let moves = [];
         if (this.x + 1 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +1] == null){
-                moves.push([this.x +1, this.y +1])
+                moves.push([this.x +1, this.y +1]);
             }else if (gameGrid[this.y +1][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y +1])
+                moves.push([this.x +1, this.y +1]);
             }}
         if (this.x - 1 >= 0 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x -1] == null){
-                moves.push([this.x -1, this.y +1])
+                moves.push([this.x -1, this.y +1]);
             }else if (gameGrid[this.y +1][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y +1])
+                moves.push([this.x -1, this.y +1]);
             }
         }
         if (this.x +1 < 8 && this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x +1] == null){
-                moves.push([this.x +1, this.y -1])
+                moves.push([this.x +1, this.y -1]);
             }else if (gameGrid[this.y -1][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y -1])
+                moves.push([this.x +1, this.y -1]);
             }
         }
         if (this.x - 1 >= 0 && this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x -1] == null){
-                moves.push([this.x -1, this.y -1])
+                moves.push([this.x -1, this.y -1]);
             }else if (gameGrid[this.y -1][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y -1])
+                moves.push([this.x -1, this.y -1]);
             }
         }
         if (this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x] == null){
-                moves.push([this.x, this.y +1])
+                moves.push([this.x, this.y +1]);
             }else if (gameGrid[this.y +1][this.x].player != this.player){
-                moves.push([this.x, this.y +1])
+                moves.push([this.x, this.y +1]);
             }}
         if (this.y - 1 >= 0){
             if (gameGrid[this.y -1][this.x] == null){
-                moves.push([this.x, this.y -1])
+                moves.push([this.x, this.y -1]);
             }else if (gameGrid[this.y -1][this.x].player != this.player){
-                moves.push([this.x, this.y -1])
+                moves.push([this.x, this.y -1]);
             }}
         if (this.x + 1 < 8){
             if (gameGrid[this.y][this.x +1] == null){
-                moves.push([this.x +1, this.y])
+                moves.push([this.x +1, this.y]);
             }else if (gameGrid[this.y][this.x +1].player != this.player){
-                moves.push([this.x +1, this.y])
+                moves.push([this.x +1, this.y]);
             }}
         if (this.x - 1 >= 0){
             if (gameGrid[this.y][this.x -1] == null){
-                moves.push([this.x -1, this.y])
+                moves.push([this.x -1, this.y]);
             }else if (gameGrid[this.y][this.x -1].player != this.player){
-                moves.push([this.x -1, this.y])
+                moves.push([this.x -1, this.y]);
             }}
         if (this.numMoves == 0){
             if (gameGrid[this.y][this.x +1] == null && gameGrid[this.y][this.x +2] == null && gameGrid[this.y][this.x +3] != null && gameGrid[this.y][this.x +3].type == "Rook" && gameGrid[this.y][this.x +3].numMoves == 0){
@@ -393,20 +387,17 @@ class King extends Piece {
                 specialMoves.push([this.x -2, this.y]);
             }
         }
-        //console.log(c)
-        if(c){
-            //console.log("this ran")
-            let removeMoves = []
+        if(c){ // because kings cant move into a check they need a different checking function compared to other piece classes
+            // this could probably be optimized, but it is not that important to optimilize it yet
+            let removeMoves = [];
             for (let i = 0; i <8; i++){
                 for (let j = 0; j < 8; j++){
                     if (gameGrid[i][j] != null && gameGrid[i][j].player != this.player){
                         if(gameGrid[i][j].type != "Pawn"){
                             removeMoves.push(gameGrid[i][j].GetMoves(false));
                         }else{
-                            //console.log("pawn")
                             let x = gameGrid[i][j].x;
                             let y = gameGrid[i][j].y;
-                            //console.log(x + " " + y)
                             if(gameGrid[i][j].player == 1){
                                 if (x + 1 < 8 && y + 1 < 8){
                                     removeMoves.push([[x +1, y +1]]);
@@ -429,7 +420,6 @@ class King extends Piece {
             for (let l = 0; l < moves.length; l++){
                 if (gameGrid[moves[l][1]][moves[l][0]] != null){
                     let original = gameGrid[moves[l][1]][moves[l][0]];
-                    //console.log(original)
                     gameGrid[moves[l][1]][moves[l][0]] = gameGrid[this.y][this.x];
                     let x = this.x;
                     let y = this.y;
@@ -437,13 +427,13 @@ class King extends Piece {
                     gameGrid[moves[l][1]][moves[l][0]].x = moves[l][0];
                     gameGrid[moves[l][1]][moves[l][0]].y = moves[l][1];
                     if(checkCheck(gameGrid, this.player)){
-                        moves.splice(l, 1);
+                        removeMoves.push(moves[l]);
                     }
                     gameGrid[y].splice(x, 0);
                     gameGrid[y].splice(x, 1, gameGrid[this.y][this.x]);
                     gameGrid[y][x].x = x;
                     gameGrid[y][x].y = y;
-                    gameGrid[original.y].splice(original.x, 0)
+                    gameGrid[original.y].splice(original.x, 0);
                     gameGrid[original.y].splice(original.x, 1, original);
                 }
             }
@@ -456,9 +446,7 @@ class King extends Piece {
                     }
                 }
             }
-            //console.log("]]]]]]]]]]]]]]]]]]]]]]]]")
-            //console.log(moves)
-            removeMoves = []
+            removeMoves = [];
             for(let m = 0; m < moves.length; m++){
                 let original = gameGrid[moves[m][1]][moves[m][0]];
                 gameGrid[moves[m][1]][moves[m][0]] = gameGrid[this.y][this.x];
@@ -469,7 +457,6 @@ class King extends Piece {
                 gameGrid[moves[m][1]][moves[m][0]].x = moves[m][0];
                 gameGrid[moves[m][1]][moves[m][0]].y = moves[m][1];
                 if(checkCheck(gameGrid, this.player)){
-                    //console.log("removed check")
                     removeMoves.push(moves[m]);
                 }
                 gameGrid[y].splice(x, 0);
@@ -487,8 +474,7 @@ class King extends Piece {
                 }
             }
         }
-        //console.log(moves)
-        return moves
+        return moves;
     }
 }
 
@@ -498,13 +484,13 @@ class Queen extends Piece {
         this.type = "Queen";
         this.value = 4;
         if (this.player == 1){
-            this.image = loadImage('images/queen.png')
+            this.image = loadImage('images/queen.png');
         }else{
-            this.image = loadImage('images/black_queen.png')
+            this.image = loadImage('images/black_queen.png');
         }
     }
     GetMoves(c){
-        let moves = []
+        let moves = [];
         for (let i = 1; i < 8; i++){
             if (this.x + i < 8){
                 if (gameGrid[this.y][this.x +i] == null){
@@ -623,13 +609,20 @@ class Queen extends Piece {
             }
         }
         if(c){
-            moves = removeLostMoves(moves, this.player, this)
+            moves = removeLostMoves(moves, this.player, this);
         }
         return moves;
     }
 }
 
-let gameGridLayout = [
+let scenario = 0;
+
+function changeScenario(){ // function for changing scenarios
+    scenario = document.getElementById("scenario").selectedIndex;
+    resetGame();
+}
+
+let gameGridLayout = [ // this is the layout of the game, the 1 and 2 represent the players that own the pieces
     [[Rook, 1], [Knight, 1], [Bishop, 1], [Queen, 1], [King, 1], [Bishop, 1], [Knight, 1], [Rook, 1]],
     [[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1]],
     [null, null, null, null, null, null, null, null],
@@ -640,8 +633,8 @@ let gameGridLayout = [
     [[Rook, 2], [Knight, 2], [Bishop, 2], [Queen, 2], [King, 2], [Bishop, 2], [Knight, 2], [Rook, 2]],
 ]
 // test check
-/*
-gameGridLayout = [
+
+let checkmateScenario = [ // this is a layout used for testing the bots decision making
     [null, null, null, null, null, null, null, null],
     [null, [King, 1], null, null, null, null, [Rook, 2], null],
     [[Rook, 2], null, null, null, null, null, null, null],
@@ -651,8 +644,9 @@ gameGridLayout = [
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 2]],
 ]
-*/
-let gameGrid = []
+
+
+let gameGrid = []; // this is the actual game grid used in the game
 for (let i = 0; i < 8; i++) {
     gameGrid.push([]);
     for (let j = 0; j < 8; j++) {
@@ -660,16 +654,16 @@ for (let i = 0; i < 8; i++) {
     }
 }
 
-let availableMoves = []
-let specialMoves = []
-let currentPlayer = "white"
+// important variable that for reason needed to be globalized
+let availableMoves = [];
+let specialMoves = [];
+let currentPlayer = "white";
 let baseSize = 0;
-let moveHistory = []
+let moveHistory = [];
 let historyOffset = 0;
-let enemy = "player"
+let enemy = "player";
 
-function Undo(){
-    //console.log(moveHistory.length + " length");
+function Undo(){ // function for undoing the a move
     if (moveHistory.length - historyOffset > 1){
         historyOffset++;
         if (moveHistory.length - historyOffset < 0){
@@ -679,8 +673,6 @@ function Undo(){
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
                 let t = moveHistory.length - historyOffset - 1;
-                //console.log("t " + t)
-                //console.log("history " + typeof(moveHistory[t][0][i][j]))
                 if (moveHistory[t][0][i][j] != null){
                     gameGrid[i][j] = moveHistory[t][0][i][j];
                     gameGrid[i][j].x = j;
@@ -691,16 +683,12 @@ function Undo(){
             }
         }
         moveHistory[moveHistory.length - historyOffset][1].numMoves--;
-        //console.log("num moves " + moveHistory[moveHistory.length - historyOffset][1].numMoves)
-        //console.log("type " + moveHistory[moveHistory.length - historyOffset][1].type)
-        //console.log("undoed")
         currentPlayer = currentPlayer == "white" ? "black" : "white";
         document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     }
 }
 
-function Redo(){
-    //console.log(moveHistory.length + " length");
+function Redo(){ // function for redoing a move
     if (historyOffset > 0){
         historyOffset--;
         if (moveHistory.length - historyOffset < 0){
@@ -721,14 +709,13 @@ function Redo(){
         }
         try{
             moveHistory[moveHistory.length - historyOffset - 1][1].numMoves++;
-            //console.log("num moves " + moveHistory[moveHistory.length - historyOffset - 1][1].numMoves)
         } catch{}
         currentPlayer = currentPlayer == "white" ? "black" : "white";
         document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     }
 }
 
-function changeMode(){
+function changeMode(){ // function for changing the enemy from player to bot and the other way around
     if (document.getElementById("btnradio1").checked){
         enemy = "player";
         document.getElementById("undoRedo").innerHTML = '<button class="btn-lg btn-primary w-50" id="undo" onclick="Undo()">Undo</button><button class="btn-lg btn-primary w-50" id="redo" onclick="Redo()">Redo</button>';
@@ -739,11 +726,9 @@ function changeMode(){
     resetGame();
 }
 
-function findBestMove(scores){
-    let bestMove = []
+function findBestMove(scores){ // this function finds the best move for the bot from the scores array, that is generated in the enemyDecision function
+    let bestMove = [];
     let bestScore = -1000000;
-    //console.log("FInal scores")
-    //console.log(scores)
     for (let i = 0; i < scores.length; i++){
         if (scores[i][2] > bestScore){
             bestScore = scores[i][2];
@@ -751,7 +736,6 @@ function findBestMove(scores){
         }
         
     }
-    //console.log("best score " + bestScore);
     if (bestScore == 0){
         let rand = Math.floor(Math.random() * scores.length);
         bestMove = [scores[rand][0], scores[rand][1], scores[rand][3], scores[rand][4]];
@@ -760,15 +744,17 @@ function findBestMove(scores){
     return bestMove;
 }
 
+// two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
 let controlVariable = 0;
-let scores = []
+let scores = [];
 
-function recursiveFunc(grid, player, depth, desiredDepth, scorePos){
+function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is a recursive function used by the bot to evaluate moves of the board
+    // this is all still under construction and can only be tested in a safe enviroment
     let originalPlayer = player;
     player = player == "white" ? "black" : "white";
     let nP = player == "white" ? 1 : 2;
     //let cPGrid = [...grid];
-    let allMoveOptions = []
+    let allMoveOptions = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player == nP){
@@ -799,10 +785,10 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){
             grid[newY].splice(newX, 1, movedPiece);
             grid[newY][newX].x = newX;
             grid[newY][newX].y = newY;
-            if (checkWin(grid, "black")){
+            if (checkWin(grid, "black") == "win"){
                 scores[scorePos][2] += parseInt(1000 - depth*100);
-            }else if(checkWin(grid, "white")){
-                scores[scorePos][2] -= parseInt(1000 - depth*100)
+            }else if(checkWin(grid, "white") == "win" || checkWin(grid, "black") == "draw"){
+                scores[scorePos][2] -= parseInt(1000 - depth*100);
                 losingMove = true;
             }
             if (depth < desiredDepth && !losingMove){
@@ -819,24 +805,27 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){
     player = originalPlayer;
 }
 
-function makeMove(move){
+function makeMove(move){ // this function is used by the bot to make the selected move
+    // still under construction
     let movingPiece = gameGrid[move[0]][move[1]];
-    //console.log("moving piece")
-    //console.log(move)
     gameGrid[move[3]].splice(move[2], 0);
     gameGrid[move[3]].splice(move[2], 1, movingPiece);
     gameGrid[move[3]][move[2]].x = move[2];
     gameGrid[move[3]][move[2]].y = move[3];
     gameGrid[move[0]].splice(move[1], 0);
     gameGrid[move[0]].splice(move[1], 1, null);
+    if (movingPiece.type == "Pawn" && (move[3] == 0 || move[3] == 7)){
+        gameGrid[move[3]].splice(move[2], 0);
+        gameGrid[move[3]].splice(move[2], 1, new Queen(move[2], move[3], movingPiece.player));
+    }
     movingPiece.numMoves++;
 }
 
-function enemyDecision(){
-    //console.log(gameGrid)
-    let bestMove = []
-    let desiredDepth = 1;
-    scores = []
+function enemyDecision(){ // this is the main function of the bot, it is called when its bots turn
+    // under construction
+    let bestMove = [];
+    let desiredDepth = 2;
+    scores = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player == 2){
@@ -847,37 +836,33 @@ function enemyDecision(){
             }
         }
     }
-    //console.log("-----------------------------------------------")
-    //console.log(scores);
-    for (let i = 0; i < scores.length; i++){
-        //console.log("/////////////////////////")
-        //console.log(scores[i]);
+    for (let i = 0; i < scores.length; i++){ // one loop of the recursive function is basically here because the places for each moves score need to be asigned a place in the scores variable
         let movingPiece = gameGrid[scores[i][0]][scores[i][1]];
-        //console.log(movingPiece.type + " moving piece")
+        //console.log(movingPiece.type + " moving piece");
         let oX = movingPiece.x;
         let oY = movingPiece.y;
         let tInPlace = gameGrid[scores[i][4]][scores[i][3]];
-        let losingMove = false
-        //console.log(tInPlace)
+        let losingMove = false;
+        //console.log(tInPlace);
         gameGrid[movingPiece.y].splice(movingPiece.x, 0);
         gameGrid[movingPiece.y].splice(movingPiece.x, 1, null);
         gameGrid[scores[i][4]].splice(scores[i][3], 0);
         gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
         gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
         gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-        if (checkWin(gameGrid, currentPlayer == "white" ? "black" : "white")){
-            //console.log("winning move")
+        if (checkWin(gameGrid, "black") == "win"){
+            //console.log("winning move");
             scores[i][2] = parseInt(scores[i][2] + 1000000);
             //break;
-        }else if (checkWin(gameGrid, currentPlayer)){
+        }else if (checkWin(gameGrid, "white") == "win" || checkWin(gameGrid, "black") == "draw"){
             scores[i][2] = parseInt(scores[i][2] - 1000000);
-            //console.log("losing move")
+            //console.log("losing move");
             losingMove = true;
         }
         if (!losingMove){
-            //console.log("recursive func")
-            //console.log(gameGrid)
-            //console.log(currentPlayer)
+            //console.log("recursive func");
+            //console.log(gameGrid);
+            //console.log(currentPlayer);
             recursiveFunc(gameGrid, currentPlayer, 0,  desiredDepth-1, i);
         }
 
@@ -889,21 +874,27 @@ function enemyDecision(){
         gameGrid[oY][oX].y = oY;
         //break; // this is just for testing
     }
-    console.log(controlVariable)
-    //console.log(controlVariable + " control variable")
+    console.log(controlVariable);
+    controlVariable = 0;
+    //console.log(controlVariable + " control variable");
     bestMove = findBestMove(scores);
+    console.log(bestMove);
     makeMove(bestMove);
-    //console.log("checking winners")
-    //console.log(gameGrid)
-    //console.log(currentPlayer)
-    if (checkWin(gameGrid, currentPlayer)){
+    //console.log("checking winners");
+    //console.log(gameGrid);
+    //console.log(currentPlayer);
+    if (checkWin(gameGrid, currentPlayer) == "win"){
         setTimeout(function(){alert("You won")}, 100);
-    }else if (checkWin(gameGrid, currentPlayer == "white" ? "black" : "white")){
+    }else if(checkWin(gameGrid, currentPlayer) == "draw"){
+        setTimeout(function(){alert("Draw!")}, 100);
+    }else if (checkWin(gameGrid, currentPlayer == "white" ? "black" : "white") == "win"){
         setTimeout(function(){alert("You lost")}, 100);
+    }else if (checkWin(gameGrid, currentPlayer == "white" ? "black" : "white") == "draw"){
+        setTimeout(function(){alert("Draw!")}, 100);
     }
 }
 
-function resizeCanvasFunc(){
+function resizeCanvasFunc(){ // function for resizing the working canvas, it is needed to make the game completely responsive
     width = document.getElementById('chessboard').offsetWidth;
     height = document.getElementById('chessboard').offsetHeight;
     size = width > height ? height : width;
@@ -916,20 +907,17 @@ window.addEventListener('resize', function () {
 }
 )
 
-function removeLostMoves(moves, player, movingPiece){
-    let answer = []
+function removeLostMoves(moves, player, movingPiece){ // this function is used to remove moves of a piece that would put the pieces king in check, it is called by every pieces GetMoves function except kings
+    let answer = [];
     for (let i = 0; i < moves.length; i++){
         gameGrid[movingPiece.y][movingPiece.x] = null;
         let tilePiece = gameGrid[moves[i][1]][moves[i][0]];
         gameGrid[moves[i][1]][moves[i][0]] = movingPiece;
-        //console.log("moves[i] " + moves[i]);
         if (checkCheck(gameGrid, player)){
             gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
             gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
-            //console.log("removed a move because of check");
             continue;
         }else{
-            //console.log("added a move");
             answer.push(moves[i]);
         }
         gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
@@ -939,23 +927,19 @@ function removeLostMoves(moves, player, movingPiece){
     return answer;
 }
 
-function checkCheck(grid, player){ // this might be integrated into checkWin in the future
+function checkCheck(grid, player){ // this function checks if a player is in check, it used throughout the code to check if moves are valid
     let king = null;
-    //console.log("checking for check");
-    //console.log(grid, "grid")
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].type == "King" && grid[i][j].player == player){
                 king = grid[i][j];
-                //console.log("king is at ", king.x, king.y)
             }
         }
     }
     if (king == null){
-        //console.log("no king found ---------------------------- ", grid);
         return false;
     }
-    let moves = []
+    let moves = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player != player){
@@ -969,7 +953,6 @@ function checkCheck(grid, player){ // this might be integrated into checkWin in 
     for (let i = 0; i < moves.length; i++){
         for (let j = 0; j < moves[i].length; j++){
             if (moves[i][j][0] == king.x && moves[i][j][1] == king.y){
-                //console.log("check");
                 return true;
             }
         }
@@ -977,7 +960,7 @@ function checkCheck(grid, player){ // this might be integrated into checkWin in 
     return false;
 }
 
-function checkWin(grid, player){
+function checkWin(grid, player){ // this function checks if a player has won, it is used in the actual game and in the bots decision making, it doesnt return true or false because there is a third option - draw
     let king = null;
     let checkingPiece = null;
     let nP = player == "white" ? 1 : 2;
@@ -989,7 +972,7 @@ function checkWin(grid, player){
         }
     }
     let numOfAlliedPieces = 0;
-    let moves = []
+    let moves = [];
     let kingMoves = king.GetMoves(true);
     kingMoves.push([king.x, king.y]);
     for (let i = 0; i < 8; i++){
@@ -1017,7 +1000,7 @@ function checkWin(grid, player){
         }
     }
     if (checkingPiece != null){
-        let cMoves = []
+        let cMoves = [];
         cMoves = checkingPiece.GetMoves(false);
         for (let i = 0; i < cMoves.length; i++){
             for (let j = 0; j < kingMoves.length; j++){
@@ -1027,32 +1010,33 @@ function checkWin(grid, player){
             }
         }
     }
-    //console.log("kingMoves " + kingMoves);
     if (kingMoves.length == 0 || kingMoves.length == 1 && numOfAlliedPieces == 0){
-        //console.log("-------------------------------------no king moves");
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
-                //gameGrid[king.y].splice(king.x, 0);
-                //gameGrid[king.y].splice(king.x, 1, null);
                 if (gameGrid[i][j] != null && gameGrid[i][j].player == nP){
                     let moves = gameGrid[i][j].GetMoves(true);
                     for (let k = 0; k < moves.length; k++){
                         let tempPiece = gameGrid[i][j];
-                        gameGrid[moves[k][1]][moves[k][0]] = gameGrid[i][j];
-                        gameGrid[i][j] = null;
+                        let movingPiece = gameGrid[moves[k][1]][moves[k][0]];
+                        gameGrid[moves[k][1]].splice(moves[k][0], 0);
+                        gameGrid[moves[k][1]].splice(moves[k][0], 1, gameGrid[i][j]);
+                        gameGrid[i].splice(j, 0);
+                        gameGrid[i].splice(j, 1, null);
                         if (!checkCheck(gameGrid, nP)){
-                            //console.log("-------------------------game is not over");
-                            gameGrid[tempPiece.y][tempPiece.x] = tempPiece;
-                            gameGrid[moves[k][1]][moves[k][0]] = null;
-                            return false;
+                            gameGrid[tempPiece.y].splice(tempPiece.x, 0);
+                            gameGrid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
+                            gameGrid[moves[k][1]].splice(moves[k][0], 0);
+                            gameGrid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
+                            return "no winner";
                         }
-                        gameGrid[tempPiece.y][tempPiece.x] = tempPiece;
-                        gameGrid[i][j] = gameGrid[moves[k][1]][moves[k][0]];
-                        gameGrid[moves[k][1]][moves[k][0]] = null;
+                        gameGrid[tempPiece.y].splice(tempPiece.x, 0);
+                        gameGrid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
+                        gameGrid[i].splice(j, 0);
+                        gameGrid[i].splice(j, 1, gameGrid[moves[k][1]][moves[k][0]]);
+                        gameGrid[moves[k][1]].splice(moves[k][0], 0);
+                        gameGrid[moves[k][1]].splice(moves[k][0], 1, null);
                     }
                 }
-                //gameGrid[king.y].splice(king.x, 0);
-                //gameGrid[king.y].splice(king.x, 1, king);
             }
         }
         /*if(grid[0][0] != null && grid[0][0].type == "Rook"){
@@ -1096,21 +1080,25 @@ function checkWin(grid, player){
                 }
             }
         }*/
-        if (kingMoves[0] == king.x && kingMoves[1] == king.y){
-            //console.log("this is happening")
-            return true;
+        //console.log(kingMoves)
+        //console.log(king.x+" "+ king.y)
+        //console.log(parseInt(kingMoves[0][0]) + " " + parseInt(kingMoves[0][1]))
+        //if (parseInt(kingMoves[1]) == 0){
+        //    console.log("draw");
+        //}
+        if (kingMoves.length != 0 && kingMoves[0][0] == king.x && kingMoves[0][1] == king.y){
+            //console.log("draw");
+            return "draw";
         }
         if (kingMoves.length == 0){
-        //console.log("-------------------------game is over");
-        //console.log(kingMoves)
-            return true;
+            return "win";
         }
     }
-    return false;
+    return "no winner";
 }
 
-function updateHistory(lastMovedPiece){
-    let temp = []
+function updateHistory(lastMovedPiece){ // this function is used to update the move history, it is called after every move, and its used for the undo and redo functions
+    let temp = [];
     for (let i = 0; i < 8; i++){
         temp.push([]);
         for (let j = 0; j < 8; j++){
@@ -1128,9 +1116,9 @@ function updateHistory(lastMovedPiece){
     moveHistory.push([temp, lastMovedPiece]);
 }
 
-function resetGame(){
-    gameGrid = []
-    moveHistory = []
+function resetGame(){ // this function is used to reset the game, it is called when the game is started and when the reset button is pressed
+    gameGrid = [];
+    moveHistory = [];
     currentPlayer = "white";
     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     availableMoves = [];
@@ -1143,16 +1131,17 @@ function resetGame(){
     }
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
-            if (gameGridLayout[y][x] != null) {
+            if (gameGridLayout[y][x] != null && scenario == 0) {
                 gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1]);
+            }else if (checkmateScenario[y][x] != null && scenario == 1){
+                gameGrid[y][x] = new checkmateScenario[y][x][0](x, y, checkmateScenario[y][x][1]);
             }
         }
     }
-    //console.log(gameGrid)
     updateHistory(null);
 }
 
-function setup() {
+function setup() { // simple setup function that creates the canvas and calls the resetGame function to fill in the new game grid
     width = windowWidth * 0.8;
     height = windowHeight * 0.8;
     size = width > height ? height : width;
@@ -1162,13 +1151,13 @@ function setup() {
     resetGame();
 }
 
-function drawTiles() {
+function drawTiles() { // this function is used to draw the tiles of the board, it is called 60 times per second by the draw function
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
             let isAvailable = false;
             for (let k = 0; k < availableMoves.length; k++) {
                 if (x == availableMoves[k][0] && y == availableMoves[k][1]) {
-                    fill(0, 255, 0)
+                    fill(0, 255, 0);
                     isAvailable = true;
                 }
             }
@@ -1184,22 +1173,21 @@ function drawTiles() {
     }
 }
 
-function drawPieces() {
+function drawPieces() { // this function is for drawing the pieces, it is called by the draw function
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
             if (gameGrid[y][x] != null) {
                 try{
                     image(gameGrid[y][x].image, x * baseSize, y * baseSize, baseSize, baseSize);
                 }catch{
-                    console.log("error with drawing image")
+                    console.log("error with drawing image");
                 }
             }
         }
     }
 }
 
-function mousePressed() {
-    //console.log(gameGrid)
+function mousePressed() { // this function is called when the mouse is pressed, it is used to for selecting and moving pieces
     let x = Math.floor(mouseX / baseSize);
     let y = Math.floor(mouseY / baseSize);
     let moveSelected = false;
@@ -1223,7 +1211,7 @@ function mousePressed() {
             gameGrid[y][x].y = y;
             gameGrid[y][x].numMoves++;
             gameGrid[selected.y][selected.x] = null;
-            availableMoves = []
+            availableMoves = [];
             if(gameGrid[y][x].type == "Pawn" && (y == 0 || y == 7)){
                 gameGrid[y][x] = new Queen(x, y, currentPlayer == "white" ? 1 : 2);
             }else if(gameGrid[y][x].type == "Pawn"){
@@ -1264,30 +1252,31 @@ function mousePressed() {
                     }
                 }
             }
-            specialMoves = []
+            specialMoves = [];
             currentPlayer = currentPlayer == "white" ? "black": "white";
             enemyPlayer = currentPlayer == "white" ? "black" : "white";
-            document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer
-            if (checkWin(gameGrid, currentPlayer)){
+            document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+            if (checkWin(gameGrid, currentPlayer) == "win"){
                 document.getElementById("currentPlayerText").textContent = "Player " + enemyPlayer + " wins!";
                 setTimeout(function(){
                     alert("Player " + enemyPlayer + " wins!");
                 }, 100);
+            } else if (checkWin(gameGrid, currentPlayer) == "draw"){
+                document.getElementById("currentPlayerText").textContent = "Draw!";
+                setTimeout(function(){
+                    alert("Draw!");
+                }, 100);
             }
             updateHistory(gameGrid[y][x]);
             if (enemy == "bot" && currentPlayer == "black"){
-                //console.log("enemy decision");
                 enemyDecision();
                 currentPlayer = "white";
                 document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-                //console.log(gameGrid)
             }
         }
     }
     let nP = currentPlayer == "white" ? 1 : 2;
     if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == nP) {
-        //console.log("this ran")
-        //console.log(gameGrid[y][x].player)
         availableMoves = gameGrid[y][x].GetMoves(true);
         for (let j = 0; j < 8; j++) {
             for (let k = 0; k < 8; k++) {
@@ -1309,7 +1298,7 @@ function mousePressed() {
     }
 }
 
-function draw() {
+function draw() { // this is the main function of the game, it is called 60 times per second, it is predefined by p5.js
     drawTiles();
     drawPieces();
 }

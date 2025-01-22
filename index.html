@@ -40,9 +40,16 @@
                         <label class="btn btn-outline-primary btn-lg" for="btnradio1">Player</label>
                     
                         <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"  onchange="changeMode()">
-                        <label class="btn btn-outline-primary btn-lg" for="btnradio2">Bot-not finished</label>
+                        <label class="btn btn-outline-primary btn-lg" for="btnradio2">Bot-NF</label>
                     </div>
                     </div>
+                <div class="text-center pt-2">
+                    <p class="display-6">Scenario</p>
+                    <select class="form-select form-select-lg" id="scenario" onchange="changeScenario()">
+                        <option value="1">Full game</option>
+                        <option value="2">Checkmate</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
