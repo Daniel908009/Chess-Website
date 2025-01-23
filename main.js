@@ -770,6 +770,7 @@ function Undo(){ // function for undoing the a move
             historyOffset--;
             return;
         }
+        let movedPiece = null;
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
                 let t = moveHistory.length - historyOffset - 1;
@@ -777,6 +778,7 @@ function Undo(){ // function for undoing the a move
                     gameGrid[i][j] = moveHistory[t][0][i][j];
                     gameGrid[i][j].x = j;
                     gameGrid[i][j].y = i;
+                    movedPiece = gameGrid[i][j];
                 }else{
                     gameGrid[i][j] = null;
                 }
@@ -785,6 +787,7 @@ function Undo(){ // function for undoing the a move
         moveHistory[moveHistory.length - historyOffset][1].numMoves--;
         currentPlayer = currentPlayer == "white" ? "black" : "white";
         document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+        highlightTiles(movedPiece);
     }
 }
 
@@ -1038,6 +1041,7 @@ function removeLostMoves(moves, player, movingPiece){ // this function is used t
 }
 
 function checkCheck(grid, player){ // this function checks if a player is in check, it used throughout the code to check if moves are valid
+    //console.log("checking check");
     let king = null;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
@@ -1063,6 +1067,7 @@ function checkCheck(grid, player){ // this function checks if a player is in che
     for (let i = 0; i < moves.length; i++){
         for (let j = 0; j < moves[i].length; j++){
             if (moves[i][j][0] == king.x && moves[i][j][1] == king.y){
+                //console.log("checked");
                 return true;
             }
         }
@@ -1070,7 +1075,28 @@ function checkCheck(grid, player){ // this function checks if a player is in che
     return false;
 }
 
+let highlightedTiles = []; // this is used in the checkWin function and it is used to let player know how to get out of check
+
+function highlightTiles(checkingPiece){ // this function highlights the tiles that the player can move to in order to get out of check
+    highlightedTiles = [];
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (gameGrid[i][j] != null && gameGrid[i][j].player != checkingPiece.player){
+                let moves = gameGrid[i][j].GetMoves(false);
+                for (let k = 0; k < moves.length; k++){
+                    if (moves[k][0] == checkingPiece.x && moves[k][1] == checkingPiece.y){
+                        highlightedTiles.push([i, j]);
+                        //console.log("highlighted");
+                        //console.log("piece x: " + i + " piece y: " + j + " type " + gameGrid[i][j].type);
+                    }
+                }
+            }
+        }
+    }
+}
+
 function checkWin(grid, player){ // this function checks if a player has won, it is used in the actual game and in the bots decision making, it doesnt return true or false because there is a third option - draw
+    //console.log("checking win")
     let king = null;
     let checkingPiece = null;
     let nP = player == "white" ? 1 : 2;
@@ -1120,7 +1146,9 @@ function checkWin(grid, player){ // this function checks if a player has won, it
             }
         }
     }
+    //console.log("here");
     if (kingMoves.length == 0 || kingMoves.length == 1 && numOfAlliedPieces == 0){
+        //console.log("-------------------")
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
                 if (gameGrid[i][j] != null && gameGrid[i][j].player == nP){
@@ -1137,6 +1165,7 @@ function checkWin(grid, player){ // this function checks if a player has won, it
                             gameGrid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
                             gameGrid[moves[k][1]].splice(moves[k][0], 0);
                             gameGrid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
+                            highlightTiles(checkingPiece);
                             return "no winner";
                         }
                         gameGrid[tempPiece.y].splice(tempPiece.x, 0);
@@ -1157,6 +1186,11 @@ function checkWin(grid, player){ // this function checks if a player has won, it
             //console.log("win");
             return "win";
         }
+    }
+    //console.log(checkingPiece);
+    if(checkingPiece != null){
+        //console.log("highlighting");
+        highlightTiles(checkingPiece);
     }
     return "no winner";
 }
@@ -1186,6 +1220,7 @@ function resetGame(){ // this function is used to reset the game, it is called w
     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     availableMoves = [];
     specialMoves = [];
+    highlightedTiles = [];
     for (let i = 0; i < 8; i++){
         gameGrid.push([]);
         for (let j = 0; j < 8; j++){
@@ -1217,7 +1252,7 @@ function setup() { // simple setup function that creates the canvas and calls th
     canvas = createCanvas(size, size);
     baseSize = height / 8;
     canvas.parent('chessboard');
-    resetGame();
+    changeScenario();
 }
 
 function drawTiles() { // this function is used to draw the tiles of the board, it is called 60 times per second by the draw function
@@ -1227,6 +1262,12 @@ function drawTiles() { // this function is used to draw the tiles of the board, 
             for (let k = 0; k < availableMoves.length; k++) {
                 if (x == availableMoves[k][0] && y == availableMoves[k][1]) {
                     fill(0, 255, 0);
+                    isAvailable = true;
+                }
+            }
+            for (let k = 0; k < highlightedTiles.length; k++){
+                if (x == highlightedTiles[k][1] && y == highlightedTiles[k][0]){
+                    fill(255, 255, 0);
                     isAvailable = true;
                 }
             }
@@ -1322,6 +1363,7 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                 }
             }
             specialMoves = [];
+            highlightedTiles = [];
             currentPlayer = currentPlayer == "white" ? "black": "white";
             enemyPlayer = currentPlayer == "white" ? "black" : "white";
             document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
