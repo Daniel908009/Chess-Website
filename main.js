@@ -73,6 +73,18 @@ class Pawn extends Piece {
     }
 }
 
+const pawnTableBlack = [ // this is a table used for the evaluation of positions of pieces on the board, it is used by the decision making algorithm
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [5, 10, 10, -20, -20, 10, 10, 5],
+    [5, -5, -10, 0, 0, -10, -5, 5],
+    [0, 0, 0, 20, 20, 0, 0, 0],
+    [5, 5, 10, 25, 25, 10, 5, 5],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+];
+const pawnTableWhite = pawnTableBlack.slice().reverse();
+
 class Rook extends Piece {
     constructor(x, y, player) {
         super(x, y, player);
@@ -150,6 +162,19 @@ class Rook extends Piece {
         return moves;
     }
 }
+
+const rookTableBlack = [
+    [0, 0, 0, 5, 5, 0, 0, 0],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [5, 10, 10, 10, 10, 10, 10, 5],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+const rookTableWhite = rookTableBlack.slice().reverse();
 
 class Bishop extends Piece {
     constructor(x, y, player) {
@@ -241,6 +266,19 @@ class Bishop extends Piece {
 
 }
 
+const bishopTableBlack = [
+    [-20, -10, -10, -10, -10, -10, -10, -20],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-10, 0, 5, 10, 10, 5, 0, -10],
+    [-10, 5, 5, 10, 10, 5, 5, -10],
+    [-10, 0, 10, 10, 10, 10, 0, -10],
+    [-10, 10, 10, 10, 10, 10, 10, -10],
+    [-10, 5, 0, 0, 0, 0, 5, -10],
+    [-20, -10, -10, -10, -10, -10, -10, -20]
+];
+
+const bishopTableWhite = bishopTableBlack.slice().reverse();
+
 class Knight extends Piece {
     constructor(x, y, player){
         super(x, y, player);
@@ -312,6 +350,19 @@ class Knight extends Piece {
         return moves;
     }
 }
+
+const knightTableBlack = [
+    [-50, -40, -30, -30, -30, -30, -40, -50],
+    [-40, -20, 0, 0, 0, 0, -20, -40],
+    [-30, 0, 10, 15, 15, 10, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 15, 20, 20, 15, 0, -30],
+    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-40, -20, 0, 5, 5, 0, -20, -40],
+    [-50, -40, -30, -30, -30, -30, -40, -50]
+];
+
+const knightTableWhite = knightTableBlack.slice().reverse();
 
 class King extends Piece {
     constructor(x, y, player){
@@ -478,6 +529,32 @@ class King extends Piece {
     }
 }
 
+const kingTableBlackEarly = [
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-30, -40, -40, -50, -50, -40, -40, -30],
+    [-20, -30, -30, -40, -40, -30, -30, -20],
+    [-10, -20, -20, -20, -20, -20, -20, -10],
+    [20, 20, 0, 0, 0, 0, 20, 20],
+    [20, 30, 10, 0, 0, 10, 30, 20]
+];
+
+const kingTableWhiteEarly = kingTableBlackEarly.slice().reverse();
+
+const kingTableBlackLate = [
+    [-50, -30, -30, -30, -30, -30, -30, -50],
+    [-30, -30, 0, 0, 0, 0, -30, -30],
+    [-30, 0, 20, 30, 30, 20, 0, -30],
+    [-30, 0, 30, 40, 40, 30, 0, -30],
+    [-30, 0, 30, 40, 40, 30, 0, -30],
+    [-30, 0, 20, 30, 30, 20, 0, -30],
+    [-30, -30, 0, 0, 0, 0, -30, -30],
+    [-50, -30, -30, -30, -30, -30, -30, -50]
+];
+
+const kingTableWhiteLate = kingTableBlackLate.slice().reverse();
+
 class Queen extends Piece {
     constructor(x, y, player){
         super(x, y, player);
@@ -615,6 +692,19 @@ class Queen extends Piece {
     }
 }
 
+const queenTableBlack = [
+    [-20, -10, -10, -5, -5, -10, -10, -20],
+    [-10, 0, 0, 0, 0, 0, 0, -10],
+    [-10, 0, 5, 5, 5, 5, 0, -10],
+    [-5, 0, 5, 5, 5, 5, 0, -5],
+    [0, 0, 5, 5, 5, 5, 0, -5],
+    [-10, 5, 5, 5, 5, 5, 0, -10],
+    [-10, 0, 5, 0, 0, 0, 0, -10],
+    [-20, -10, -10, -5, -5, -10, -10, -20]
+];
+
+const queenTableWhite = queenTableBlack.slice().reverse();
+
 let scenario = 0;
 
 function changeScenario(){ // function for changing scenarios
@@ -622,7 +712,7 @@ function changeScenario(){ // function for changing scenarios
     resetGame();
 }
 
-let gameGridLayout = [ // this is the layout of the game, the 1 and 2 represent the players that own the pieces
+let gameGridLayout = [[ // this is the layout of the game, the 1 and 2 represent the players that own the pieces
     [[Rook, 1], [Knight, 1], [Bishop, 1], [Queen, 1], [King, 1], [Bishop, 1], [Knight, 1], [Rook, 1]],
     [[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1]],
     [null, null, null, null, null, null, null, null],
@@ -631,10 +721,9 @@ let gameGridLayout = [ // this is the layout of the game, the 1 and 2 represent 
     [null, null, null, null, null, null, null, null],
     [[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2]],
     [[Rook, 2], [Knight, 2], [Bishop, 2], [Queen, 2], [King, 2], [Bishop, 2], [Knight, 2], [Rook, 2]],
-]
-// test check
+], "white"];
 
-let checkmateScenario = [ // this is a layout used for testing the bots decision making
+let checkmateScenarioBlack = [[ // this is a layout used for testing the bots decision making
     [null, null, null, null, null, null, null, null],
     [null, [King, 1], null, null, null, null, [Rook, 2], null],
     [[Rook, 2], null, null, null, null, null, null, null],
@@ -643,7 +732,18 @@ let checkmateScenario = [ // this is a layout used for testing the bots decision
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 2]],
-]
+], "white"];
+
+let checkmateScenarioWhite = [[ // this is the same as blacks checkmate but reversed
+    [null, null, null, null, null, null, null, null],
+    [null, [King, 2], null, null, null, null, [Rook, 1], null],
+    [[Rook, 1], null, null, null, null, null, null, null],
+    [[Rook, 1], null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, null],
+    [null, null, null, null, null, null, null, [King, 1]],
+], "black"];
 
 
 let gameGrid = []; // this is the actual game grid used in the game
@@ -711,7 +811,14 @@ function Redo(){ // function for redoing a move
             moveHistory[moveHistory.length - historyOffset - 1][1].numMoves++;
         } catch{}
         currentPlayer = currentPlayer == "white" ? "black" : "white";
-        document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+        oppositePlayer = currentPlayer == "white" ? "black" : "white";
+        if (checkWin(gameGrid, currentPlayer) == "win"){
+            document.getElementById("currentPlayerText").textContent = "Player " + oppositePlayer + " wins!";
+        }else if (checkWin(gameGrid, currentPlayer) == "draw"){
+            document.getElementById("currentPlayerText").textContent = "Draw!";
+        }else{
+            document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+        }
     }
 }
 
@@ -739,6 +846,7 @@ function findBestMove(scores){ // this function finds the best move for the bot 
     if (bestScore == 0){
         let rand = Math.floor(Math.random() * scores.length);
         bestMove = [scores[rand][0], scores[rand][1], scores[rand][3], scores[rand][4]];
+        console.log("random move");
     }
     
     return bestMove;
@@ -785,10 +893,10 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             grid[newY].splice(newX, 1, movedPiece);
             grid[newY][newX].x = newX;
             grid[newY][newX].y = newY;
-            if (checkWin(grid, "black") == "win"){
-                scores[scorePos][2] += parseInt(1000 - depth*100);
-            }else if(checkWin(grid, "white") == "win" || checkWin(grid, "black") == "draw"){
-                scores[scorePos][2] -= parseInt(1000 - depth*100);
+            if (checkWin(grid, "white") == "win"){
+                scores[scorePos][2] += parseInt(10000 - depth*1000);
+            }else if(checkWin(grid, "black") == "win" || checkWin(grid, "white") == "draw"){
+                scores[scorePos][2] -= parseInt(10000 - depth*1000);
                 losingMove = true;
             }
             if (depth < desiredDepth && !losingMove){
@@ -850,13 +958,14 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
         gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
         gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-        if (checkWin(gameGrid, "black") == "win"){
+        //console.log(checkWin(gameGrid, "black"));
+        if (checkWin(gameGrid, "white") == "win"){
             //console.log("winning move");
-            scores[i][2] = parseInt(scores[i][2] + 1000000);
+            scores[i][2] = parseInt(scores[i][2] + 10000);
             //break;
-        }else if (checkWin(gameGrid, "white") == "win" || checkWin(gameGrid, "black") == "draw"){
-            scores[i][2] = parseInt(scores[i][2] - 1000000);
-            //console.log("losing move");
+        }else if (checkWin(gameGrid, "black") == "win" || checkWin(gameGrid, "white") == "draw"){
+            scores[i][2] = parseInt(scores[i][2] - 10000);
+            console.log("losing move");
             losingMove = true;
         }
         if (!losingMove){
@@ -877,6 +986,7 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
     console.log(controlVariable);
     controlVariable = 0;
     //console.log(controlVariable + " control variable");
+    console.log(scores);
     bestMove = findBestMove(scores);
     console.log(bestMove);
     makeMove(bestMove);
@@ -902,7 +1012,7 @@ function resizeCanvasFunc(){ // function for resizing the working canvas, it is 
     baseSize = height / 8;
 }
 
-window.addEventListener('resize', function () {
+window.addEventListener('resize', function () { // this ensures that canvas is resized when the window is resized
     resizeCanvasFunc();
 }
 )
@@ -1039,58 +1149,12 @@ function checkWin(grid, player){ // this function checks if a player has won, it
                 }
             }
         }
-        /*if(grid[0][0] != null && grid[0][0].type == "Rook"){
-            console.log("this is happening")
-            console.log(kingMoves)
-        }*/
-        /*let removeMoves = []                                                  // maybe important for later
-        for (let i = 0; i < kingMoves.length; i++){
-            // putting the king in a place and checking if it is in check
-            let orPiece = gameGrid[kingMoves[i][1]][kingMoves[i][0]];
-            let x = king.x;
-            let y = king.y;
-            gameGrid[king.y].splice(king.x, 0);
-            gameGrid[king.y].splice(king.x, 1, null);
-            gameGrid[kingMoves[i][1]].splice(kingMoves[i][0], 0);
-            gameGrid[kingMoves[i][1]].splice(kingMoves[i][0], 1, king);
-            king.x = kingMoves[i][0];
-            king.y = kingMoves[i][1];
-            if (!checkCheck(gameGrid, nP)){
-                gameGrid[king.y].splice(king.x, 0);
-                gameGrid[king.y].splice(king.x, 1, orPiece);
-                gameGrid[king.y][king.x].x = king.x;
-                gameGrid[king.y][king.x].y = king.y;
-                king.x = orPiece.x;
-                king.y = orPiece.y;
-                return false;
-            }else{
-                gameGrid[y].splice(x, 0);
-                gameGrid[y].splice(x, 1, king);
-                king.x = x;
-                king.y = y;
-                gameGrid[kingMoves[i][1]].splice(kingMoves[i][0], 0);
-                gameGrid[kingMoves[i][1]].splice(kingMoves[i][0], 1, orPiece);
-                removeMoves.push([kingMoves[i][0], kingMoves[i][1]]);
-            }
-        }
-        for (let i = 0; i < removeMoves.length; i++){
-            for (let j = 0; j < kingMoves.length; j++){
-                if (removeMoves[i][0] == kingMoves[j][0] && removeMoves[i][1] == kingMoves[j][1]){
-                    kingMoves.splice(j, 1);
-                }
-            }
-        }*/
-        //console.log(kingMoves)
-        //console.log(king.x+" "+ king.y)
-        //console.log(parseInt(kingMoves[0][0]) + " " + parseInt(kingMoves[0][1]))
-        //if (parseInt(kingMoves[1]) == 0){
-        //    console.log("draw");
-        //}
         if (kingMoves.length != 0 && kingMoves[0][0] == king.x && kingMoves[0][1] == king.y){
             //console.log("draw");
             return "draw";
         }
         if (kingMoves.length == 0){
+            //console.log("win");
             return "win";
         }
     }
@@ -1119,7 +1183,6 @@ function updateHistory(lastMovedPiece){ // this function is used to update the m
 function resetGame(){ // this function is used to reset the game, it is called when the game is started and when the reset button is pressed
     gameGrid = [];
     moveHistory = [];
-    currentPlayer = "white";
     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
     availableMoves = [];
     specialMoves = [];
@@ -1131,10 +1194,16 @@ function resetGame(){ // this function is used to reset the game, it is called w
     }
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
-            if (gameGridLayout[y][x] != null && scenario == 0) {
-                gameGrid[y][x] = new gameGridLayout[y][x][0](x, y, gameGridLayout[y][x][1]);
-            }else if (checkmateScenario[y][x] != null && scenario == 1){
-                gameGrid[y][x] = new checkmateScenario[y][x][0](x, y, checkmateScenario[y][x][1]);
+            if (gameGridLayout[0][y][x] != null && scenario == 0) {
+                gameGrid[y][x] = new gameGridLayout[0][y][x][0](x, y, gameGridLayout[0][y][x][1]);
+                currentPlayer = gameGridLayout[1];
+            }else if (checkmateScenarioBlack[0][y][x] != null && scenario == 1){
+                gameGrid[y][x] = new checkmateScenarioBlack[0][y][x][0](x, y, checkmateScenarioBlack[0][y][x][1]);
+                currentPlayer = checkmateScenarioBlack[1];
+            }else if (checkmateScenarioWhite[0][y][x] != null && scenario == 2){
+                gameGrid[y][x] = new checkmateScenarioWhite[0][y][x][0](x, y, checkmateScenarioWhite[0][y][x][1]);
+                currentPlayer = checkmateScenarioWhite[1];
+                console.log(currentPlayer);
             }
         }
     }
