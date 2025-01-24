@@ -705,7 +705,10 @@ const queenTableBlack = [
 
 const queenTableWhite = queenTableBlack.slice().reverse();
 
+const tableOfTables = [["Pawn", pawnTableWhite,pawnTableBlack], ["Rook", rookTableWhite, rookTableBlack], ["Bishop", bishopTableWhite, bishopTableBlack], ["Knight", knightTableWhite, knightTableBlack], ["King", kingTableWhiteEarly, kingTableBlackEarly, kingTableWhiteLate, kingTableBlackLate], ["Queen", queenTableWhite, queenTableBlack]];
+
 let scenario = 0;
+let faze = "early";
 
 function changeScenario(){ // function for changing scenarios
     scenario = document.getElementById("scenario").selectedIndex;
@@ -836,6 +839,20 @@ function changeMode(){ // function for changing the enemy from player to bot and
     resetGame();
 }
 
+function numberOfPieces(grid, player){ // function that counts the number of pieces of a player, it is mainly used for checking if the game is in late game or early game
+    let nP = player == "white" ? 1:2;
+    let count = 0;
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            //console.log(grid[i][j]);
+            if (grid[i][j] != null && grid[i][j].player == nP){
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 function findBestMove(scores){ // this function finds the best move for the bot from the scores array, that is generated in the enemyDecision function
     let bestMove = [];
     let bestScore = -1000000;
@@ -853,6 +870,28 @@ function findBestMove(scores){ // this function finds the best move for the bot 
     }
     
     return bestMove;
+}
+
+function valuePlayersPieces(grid, player){ // this function is used by the bot to evaluate the value of the board
+    let value = 0;
+    let nP = player == "white" ? 1 : 2;
+    for (let i = 0; i < 8; i++){
+        for (let j = 0; j < 8; j++){
+            if (grid[i][j] != null && grid[i][j].player == nP){
+                value += grid[i][j].value;
+                for (let k = 0; k < tableOfTables.length; k++){
+                    if (grid[i][j].type != "King" && grid[i][j].type == tableOfTables[k][0]){
+                        value = value + tableOfTables[k][grid[i][j].player][i][j]/100;
+                    }else if (faze == "early"){
+                        value = value + tableOfTables[k][grid[i][j].player][i][j]/100;
+                    }else if (faze == "late"){
+                        value = value + tableOfTables[k][grid[i][j].player + 2][i][j]/100;
+                    }
+                }
+            }
+        }
+    }
+    return value;
 }
 
 // two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
@@ -1076,13 +1115,20 @@ function checkCheck(grid, player){ // this function checks if a player is in che
 }
 
 let highlightedTiles = []; // this is used in the checkWin function and it is used to let player know how to get out of check
+let checkedKing = []; // this is used for highlighting the king that is in check
 
 function highlightTiles(checkingPiece){ // this function highlights the tiles that the player can move to in order to get out of check
     highlightedTiles = [];
+    checkedKing = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player != checkingPiece.player){
                 let moves = gameGrid[i][j].GetMoves(false);
+                //console.log(gameGrid[i][j].type);
+                if(gameGrid[i][j].type == "King"){
+                    checkedKing = [i, j];
+                    //console.log("a;lsdfkj");
+                }
                 for (let k = 0; k < moves.length; k++){
                     if (moves[k][0] == checkingPiece.x && moves[k][1] == checkingPiece.y){
                         highlightedTiles.push([i, j]);
@@ -1221,6 +1267,8 @@ function resetGame(){ // this function is used to reset the game, it is called w
     availableMoves = [];
     specialMoves = [];
     highlightedTiles = [];
+    checkedKing = [];
+    faze = "early";
     for (let i = 0; i < 8; i++){
         gameGrid.push([]);
         for (let j = 0; j < 8; j++){
@@ -1238,7 +1286,7 @@ function resetGame(){ // this function is used to reset the game, it is called w
             }else if (checkmateScenarioWhite[0][y][x] != null && scenario == 2){
                 gameGrid[y][x] = new checkmateScenarioWhite[0][y][x][0](x, y, checkmateScenarioWhite[0][y][x][1]);
                 currentPlayer = checkmateScenarioWhite[1];
-                console.log(currentPlayer);
+                //console.log(currentPlayer);
             }
         }
     }
@@ -1270,6 +1318,14 @@ function drawTiles() { // this function is used to draw the tiles of the board, 
                     fill(255, 255, 0);
                     isAvailable = true;
                 }
+            }
+            /*if(highlightedTiles.length !=0){
+                console.log(checkedKing);
+            }*/
+            if(highlightedTiles.length !=0 && x == checkedKing[1] && y == checkedKing[0]){
+                //console.log("king highlighted");
+                fill(255, 0, 0);
+                isAvailable = true;
             }
             if (gameGrid[y][x] != null && gameGrid[y][x].selected){
                 fill(0, 0, 255);
@@ -1364,9 +1420,13 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             }
             specialMoves = [];
             highlightedTiles = [];
+            checkedKing = [];
             currentPlayer = currentPlayer == "white" ? "black": "white";
             enemyPlayer = currentPlayer == "white" ? "black" : "white";
             document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+            if (numberOfPieces(gameGrid, "white") < 10 && numberOfPieces(gameGrid, "black") < 10){
+                faze = "late";
+            }
             if (checkWin(gameGrid, currentPlayer) == "win"){
                 document.getElementById("currentPlayerText").textContent = "Player " + enemyPlayer + " wins!";
                 setTimeout(function(){
@@ -1407,6 +1467,7 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             }
         }
     }
+    console.log(valuePlayersPieces(gameGrid, "white"));
 }
 
 function draw() { // this is the main function of the game, it is called 60 times per second, it is predefined by p5.js
