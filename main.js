@@ -828,6 +828,63 @@ function Redo(){ // function for redoing a move
     }
 }
 
+function importGame(){ // function for importing games from a json file
+    console.log("importing");
+    let file = document.getElementById("import").files[0];
+    if (file.type != "application/json"){
+        alert("Please select a json file");
+        return;
+    }
+    // this will be done later
+}
+
+function exportGame(){ // function for exporting the game to a json file
+    //console.log("exporting");
+    let name = document.getElementById("name").value;
+    if (name == ""){
+        name = "game";
+    }
+    let convertedGrid = []; // the gameGrid is converted to a format that can be exported to a json file
+    let convertedHistory = []; // same for the moveHistory
+    for (let i = 0; i < 8; i++){
+        convertedGrid.push([]);
+        for (let j = 0; j < 8; j++){
+            if (gameGrid[i][j] == null){
+                convertedGrid[i].push(null);
+            }else{
+                convertedGrid[i].push([gameGrid[i][j].type, gameGrid[i][j].player, gameGrid[i][j].numMoves, gameGrid[i][j].value]);
+            }
+        }
+    }
+    //console.log(moveHistory);
+    for (let i = 0; i < moveHistory.length; i++){
+        if (moveHistory[i][1] == null){
+            convertedHistory.push([[moveHistory[i][0].type, moveHistory[i][0].player, moveHistory[i][0].numMoves, moveHistory[i][0].value], null]);
+            continue;
+        }
+        convertedHistory.push([[moveHistory[i][0].type, moveHistory[i][0].player, moveHistory[i][0].numMoves, moveHistory[i][0].value], [moveHistory[i][1].type, moveHistory[i][1].player, moveHistory[i][1].numMoves, moveHistory[i][1].value]]);
+    }
+    let game = {
+        "convertedGrid": convertedGrid,
+        "currentPlayer": currentPlayer,
+        "convertedHistory": convertedHistory,
+        "historyOffset": historyOffset,
+        "faze": faze,
+        "enemy": enemy,
+        "name": name
+    };
+    console.log(game);
+    let json = JSON.stringify(game);
+    let link = document.createElement('a');
+    let blob = new Blob([json], {type: "application/json"});
+    link.href = URL.createObjectURL(blob);
+    link.download = name + ".json";
+    //return;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function changeMode(){ // function for changing the enemy from player to bot and the other way around
     if (document.getElementById("btnradio1").checked){
         enemy = "player";
@@ -844,7 +901,6 @@ function numberOfPieces(grid, player){ // function that counts the number of pie
     let count = 0;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
-            //console.log(grid[i][j]);
             if (grid[i][j] != null && grid[i][j].player == nP){
                 count++;
             }
@@ -903,7 +959,6 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
     let originalPlayer = player;
     player = player == "white" ? "black" : "white";
     let nP = player == "white" ? 1 : 2;
-    //let cPGrid = [...grid];
     let allMoveOptions = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
@@ -915,10 +970,6 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             }
         }
     }
-    //console.log(allMoveOptions)
-    //console.log("--------------------------------------------------------------")
-    //console.log(player)
-    //return;
     for (let i =0; i < allMoveOptions.length; i++){
         for (let j = 0; j < allMoveOptions[i][1].length; j++){
             controlVariable++;
@@ -988,32 +1039,24 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
     }
     for (let i = 0; i < scores.length; i++){ // one loop of the recursive function is basically here because the places for each moves score need to be asigned a place in the scores variable
         let movingPiece = gameGrid[scores[i][0]][scores[i][1]];
-        //console.log(movingPiece.type + " moving piece");
         let oX = movingPiece.x;
         let oY = movingPiece.y;
         let tInPlace = gameGrid[scores[i][4]][scores[i][3]];
         let losingMove = false;
-        //console.log(tInPlace);
         gameGrid[movingPiece.y].splice(movingPiece.x, 0);
         gameGrid[movingPiece.y].splice(movingPiece.x, 1, null);
         gameGrid[scores[i][4]].splice(scores[i][3], 0);
         gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
         gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
         gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-        //console.log(checkWin(gameGrid, "black"));
         if (checkWin(gameGrid, "white") == "win"){
-            //console.log("winning move");
             scores[i][2] = parseInt(scores[i][2] + 10000);
-            //break;
         }else if (checkWin(gameGrid, "black") == "win" || checkWin(gameGrid, "white") == "draw"){
             scores[i][2] = parseInt(scores[i][2] - 10000);
             console.log("losing move");
             losingMove = true;
         }
         if (!losingMove){
-            //console.log("recursive func");
-            //console.log(gameGrid);
-            //console.log(currentPlayer);
             recursiveFunc(gameGrid, currentPlayer, 0,  desiredDepth-1, i);
         }
 
@@ -1023,18 +1066,13 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         gameGrid[oY].splice(oX, 1, movingPiece);
         gameGrid[oY][oX].x = oX;
         gameGrid[oY][oX].y = oY;
-        //break; // this is just for testing
     }
     console.log(controlVariable);
     controlVariable = 0;
-    //console.log(controlVariable + " control variable");
     console.log(scores);
     bestMove = findBestMove(scores);
     console.log(bestMove);
     makeMove(bestMove);
-    //console.log("checking winners");
-    //console.log(gameGrid);
-    //console.log(currentPlayer);
     if (checkWin(gameGrid, currentPlayer) == "win"){
         setTimeout(function(){alert("You won")}, 100);
     }else if(checkWin(gameGrid, currentPlayer) == "draw"){
@@ -1080,7 +1118,6 @@ function removeLostMoves(moves, player, movingPiece){ // this function is used t
 }
 
 function checkCheck(grid, player){ // this function checks if a player is in check, it used throughout the code to check if moves are valid
-    //console.log("checking check");
     let king = null;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
@@ -1106,7 +1143,6 @@ function checkCheck(grid, player){ // this function checks if a player is in che
     for (let i = 0; i < moves.length; i++){
         for (let j = 0; j < moves[i].length; j++){
             if (moves[i][j][0] == king.x && moves[i][j][1] == king.y){
-                //console.log("checked");
                 return true;
             }
         }
@@ -1124,16 +1160,12 @@ function highlightTiles(checkingPiece){ // this function highlights the tiles th
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player != checkingPiece.player){
                 let moves = gameGrid[i][j].GetMoves(false);
-                //console.log(gameGrid[i][j].type);
                 if(gameGrid[i][j].type == "King"){
                     checkedKing = [i, j];
-                    //console.log("a;lsdfkj");
                 }
                 for (let k = 0; k < moves.length; k++){
                     if (moves[k][0] == checkingPiece.x && moves[k][1] == checkingPiece.y){
                         highlightedTiles.push([i, j]);
-                        //console.log("highlighted");
-                        //console.log("piece x: " + i + " piece y: " + j + " type " + gameGrid[i][j].type);
                     }
                 }
             }
@@ -1142,7 +1174,6 @@ function highlightTiles(checkingPiece){ // this function highlights the tiles th
 }
 
 function checkWin(grid, player){ // this function checks if a player has won, it is used in the actual game and in the bots decision making, it doesnt return true or false because there is a third option - draw
-    //console.log("checking win")
     let king = null;
     let checkingPiece = null;
     let nP = player == "white" ? 1 : 2;
@@ -1192,9 +1223,7 @@ function checkWin(grid, player){ // this function checks if a player has won, it
             }
         }
     }
-    //console.log("here");
     if (kingMoves.length == 0 || kingMoves.length == 1 && numOfAlliedPieces == 0){
-        //console.log("-------------------")
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
                 if (gameGrid[i][j] != null && gameGrid[i][j].player == nP){
@@ -1225,17 +1254,13 @@ function checkWin(grid, player){ // this function checks if a player has won, it
             }
         }
         if (kingMoves.length != 0 && kingMoves[0][0] == king.x && kingMoves[0][1] == king.y){
-            //console.log("draw");
             return "draw";
         }
         if (kingMoves.length == 0){
-            //console.log("win");
             return "win";
         }
     }
-    //console.log(checkingPiece);
     if(checkingPiece != null){
-        //console.log("highlighting");
         highlightTiles(checkingPiece);
     }
     return "no winner";
@@ -1286,7 +1311,6 @@ function resetGame(){ // this function is used to reset the game, it is called w
             }else if (checkmateScenarioWhite[0][y][x] != null && scenario == 2){
                 gameGrid[y][x] = new checkmateScenarioWhite[0][y][x][0](x, y, checkmateScenarioWhite[0][y][x][1]);
                 currentPlayer = checkmateScenarioWhite[1];
-                //console.log(currentPlayer);
             }
         }
     }
@@ -1319,11 +1343,7 @@ function drawTiles() { // this function is used to draw the tiles of the board, 
                     isAvailable = true;
                 }
             }
-            /*if(highlightedTiles.length !=0){
-                console.log(checkedKing);
-            }*/
             if(highlightedTiles.length !=0 && x == checkedKing[1] && y == checkedKing[0]){
-                //console.log("king highlighted");
                 fill(255, 0, 0);
                 isAvailable = true;
             }
