@@ -46,19 +46,21 @@
                 <div class="text-center pt-2">
                     <p class="display-6">Scenario</p>
                     <select class="form-select form-select-lg" id="scenario" onchange="changeScenario()">
-                        <option value="1">Full game</option>
-                        <option value="2">Checkmate Black</option>
-                        <option value="3">Checkmate White</option>
                     </select>
                 </div>
                 <div class="text-center pt-2">
                     <p class="display-6">Management</p>
-                    <p class="lead fw-bold">Export Game</p>
+                    <p class="lead fw-bold">Save Game as Scenario</p>
+                    <input type="text" class="form-control mt-2" id="nameLocal" placeholder="Name">
+                    <button class="btn-lg btn-primary w-100 mt-2" id="save" onclick="saveGame()">Save</button>
+                    <p class="lead fw-bold mt-2">Export Game</p>
                     <input type="text" class="form-control mt-2" id="name" placeholder="Name">
                     <button class="btn-lg btn-primary w-100 mt-2" id="export" onclick="exportGame()">Export</button>
                     <p class="lead fw-bold mt-2">Import Game</p>
                     <input type="file" class="form-control mt-2" id="Import">
                     <button class="btn-lg btn-primary w-100 mt-2" id="import" onclick="importGame()">Import</button>
+                    <p class="lead fw-bold mt-2">Delete this Game</p>
+                    <button class="btn-lg btn-danger w-100 mt-2" id="delete" onclick="deleteGame()">Delete</button>
                 </div>
             </div>
         </div>

@@ -708,46 +708,48 @@ const queenTableWhite = queenTableBlack.slice().reverse();
 const tableOfTables = [["Pawn", pawnTableWhite,pawnTableBlack], ["Rook", rookTableWhite, rookTableBlack], ["Bishop", bishopTableWhite, bishopTableBlack], ["Knight", knightTableWhite, knightTableBlack], ["King", kingTableWhiteEarly, kingTableBlackEarly, kingTableWhiteLate, kingTableBlackLate], ["Queen", queenTableWhite, queenTableBlack]];
 
 let scenario = 0;
-let faze = "early";
+let faze = ["early", "early"];
 
 function changeScenario(){ // function for changing scenarios
     scenario = document.getElementById("scenario").selectedIndex;
+    //console.log(scenario);
     resetGame();
 }
 
 let gameGridLayout = [[ // this is the layout of the game, the 1 and 2 represent the players that own the pieces
-    [[Rook, 1], [Knight, 1], [Bishop, 1], [Queen, 1], [King, 1], [Bishop, 1], [Knight, 1], [Rook, 1]],
-    [[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1],[Pawn, 1]],
+    [[Rook, 1, 0], [Knight, 1, 0], [Bishop, 1, 0], [Queen, 1, 0], [King, 1, 0], [Bishop, 1, 0], [Knight, 1, 0], [Rook, 1, 0]],
+    [[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0],[Pawn, 1, 0]],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
-    [[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2],[Pawn, 2]],
-    [[Rook, 2], [Knight, 2], [Bishop, 2], [Queen, 2], [King, 2], [Bishop, 2], [Knight, 2], [Rook, 2]],
-], "white"];
+    [[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0]],
+    [[Rook, 2, 0], [Knight, 2, 0], [Bishop, 2, 0], [Queen, 2, 0], [King, 2, 0], [Bishop, 2, 0], [Knight, 2, 0], [Rook, 2, 0]],
+], "white", [[[null,null,null,null],null]], 0, ["early", "early"], "player", [], [], [], []];
 
 let checkmateScenarioBlack = [[ // this is a layout used for testing the bots decision making
     [null, null, null, null, null, null, null, null],
-    [null, [King, 1], null, null, null, null, [Rook, 2], null],
-    [[Rook, 2], null, null, null, null, null, null, null],
-    [[Rook, 2], null, null, null, null, null, null, null],
+    [null, [King, 1, 0], null, null, null, null, [Rook, 2, 0], null],
+    [[Rook, 2, 0], null, null, null, null, null, null, null],
+    [[Rook, 2, 0], null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, [King, 2]],
-], "white"];
+    [null, null, null, null, null, null, null, [King, 2, 0]],
+], "white", [[[null,null,null,null],null]], 0, ["early", "early"], "bot", [], [], [], []];
 
 let checkmateScenarioWhite = [[ // this is the same as blacks checkmate but reversed
     [null, null, null, null, null, null, null, null],
-    [null, [King, 2], null, null, null, null, [Rook, 1], null],
-    [[Rook, 1], null, null, null, null, null, null, null],
-    [[Rook, 1], null, null, null, null, null, null, null],
+    [null, [King, 2, 0], null, null, null, null, [Rook, 1, 0], null],
+    [[Rook, 1, 0], null, null, null, null, null, null, null],
+    [[Rook, 1, 0], null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, [King, 1]],
-], "black"];
+    [null, null, null, null, null, null, null, [King, 1, 0]],
+], "black", [[[null,null,null,null],null]], 0, ["early", "early"], "bot", [], [], [], []];
 
+let allGridLayouts = [["Full game", gameGridLayout, false], ["Checkmate Black", checkmateScenarioBlack, false], ["Checkmate White", checkmateScenarioWhite, false]]
 
 let gameGrid = []; // this is the actual game grid used in the game
 for (let i = 0; i < 8; i++) {
@@ -828,14 +830,56 @@ function Redo(){ // function for redoing a move
     }
 }
 
+function saveGame(){ // function that saves the current game as a layout for a scenario
+    console.log("saving");
+    document.getElementById("nameLocal").value = "";
+}
+
 function importGame(){ // function for importing games from a json file
-    console.log("importing");
-    let file = document.getElementById("import").files[0];
-    if (file.type != "application/json"){
+    //console.log("importing");
+    let file = document.getElementById("Import").files[0];
+    //console.log(file);
+    if (file == null || file.type != "application/json"){
         alert("Please select a json file");
         return;
     }
-    // this will be done later
+    let reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(){
+        let game = JSON.parse(reader.result);
+        let grid = [];
+        //console.log(game.convertedGrid);
+        for (let i = 0; i < 8; i++){
+            grid.push([]);
+            for (let j = 0; j < 8; j++){
+                if (game.convertedGrid[i][j] == null){
+                    grid[i].push(null);
+                }else{
+                    if (game.convertedGrid[i][j][0] == "Pawn"){
+                        grid[i].push([Pawn, game.convertedGrid[i][j][1]]);
+                    }else if (game.convertedGrid[i][j][0] == "Rook"){
+                        grid[i].push([Rook, game.convertedGrid[i][j][1]]);
+                    }else if (game.convertedGrid[i][j][0] == "Bishop"){
+                        grid[i].push([Bishop, game.convertedGrid[i][j][1]]);
+                    }else if (game.convertedGrid[i][j][0] == "Knight"){
+                        grid[i].push([Knight, game.convertedGrid[i][j][1]]);
+                    }else if (game.convertedGrid[i][j][0] == "King"){
+                        grid[i].push([King, game.convertedGrid[i][j][1]]);
+                    }else if (game.convertedGrid[i][j][0] == "Queen"){
+                        grid[i].push([Queen, game.convertedGrid[i][j][1]]);
+                    }
+                }
+            }
+        }
+        allGridLayouts.push([game.name, [grid, game.currentPlayer, game.moveHistory, game.historyOffset, game.faze, game.enemy, game.availableMoves, game.specialMoves, game.highlightedTiles, game.checkedKing], true]);
+        makeOptions();
+        scenario = allGridLayouts.length - 1;
+        document.getElementById("scenario").selectedIndex = scenario;
+        console.log(scenario + " scenario");
+        document.getElementById("Import").value = "";
+        //console.log(allGridLayouts);
+        resetGame();
+    }
 }
 
 function exportGame(){ // function for exporting the game to a json file
@@ -871,9 +915,13 @@ function exportGame(){ // function for exporting the game to a json file
         "historyOffset": historyOffset,
         "faze": faze,
         "enemy": enemy,
-        "name": name
+        "name": name,
+        "availableMoves": availableMoves,
+        "specialMoves": specialMoves,
+        "highlightedTiles": highlightedTiles,
+        "checkedKing": checkedKing
     };
-    console.log(game);
+    //console.log(game);
     let json = JSON.stringify(game);
     let link = document.createElement('a');
     let blob = new Blob([json], {type: "application/json"});
@@ -883,6 +931,7 @@ function exportGame(){ // function for exporting the game to a json file
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    document.getElementById("name").value = "";
 }
 
 function changeMode(){ // function for changing the enemy from player to bot and the other way around
@@ -894,6 +943,22 @@ function changeMode(){ // function for changing the enemy from player to bot and
         document.getElementById("undoRedo").innerHTML = "";
     }
     resetGame();
+}
+
+function deleteGame(){ // function that deletes the game from all places where the game is stored
+    if (allGridLayouts.length == 1){
+        alert("You can't delete the only game");
+        return;
+    }
+    if(allGridLayouts[scenario][2]){
+        allGridLayouts.splice(scenario, 1);
+    }else{
+        alert("You cant delete a base game scenario");
+    }
+    makeOptions();
+    changeScenario();
+    resetGame();
+    //console.log(allGridLayouts);
 }
 
 function numberOfPieces(grid, player){ // function that counts the number of pieces of a player, it is mainly used for checking if the game is in late game or early game
@@ -930,24 +995,32 @@ function findBestMove(scores){ // this function finds the best move for the bot 
 
 function valuePlayersPieces(grid, player){ // this function is used by the bot to evaluate the value of the board
     let value = 0;
+    let index = 0;
     let nP = player == "white" ? 1 : 2;
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player == nP){
                 value += grid[i][j].value;
                 for (let k = 0; k < tableOfTables.length; k++){
-                    if (grid[i][j].type != "King" && grid[i][j].type == tableOfTables[k][0]){
-                        value = value + tableOfTables[k][grid[i][j].player][i][j]/100;
-                    }else if (faze == "early"){
-                        value = value + tableOfTables[k][grid[i][j].player][i][j]/100;
-                    }else if (faze == "late"){
-                        value = value + tableOfTables[k][grid[i][j].player + 2][i][j]/100;
+                    if(grid[i][j].type == tableOfTables[k][0]){
+                        index = k;
+                        //console.log(index);
                     }
+                }
+                if (grid[i][j].type != "King" && grid[i][j].type == tableOfTables[index][0]){
+                    value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
+                }else if (faze[nP - 1] == "early"){
+                    //console.log("here");
+                    value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
+                }else if (faze[nP - 1] == "late"){
+                    //console.log("here");
+                    //console.log(tableOfTables[index]);
+                    value = value + tableOfTables[index][grid[i][j].player + 2][i][j]/100;
                 }
             }
         }
     }
-    return value;
+    return Math.round(value*100) / 100;
 }
 
 // two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
@@ -1285,15 +1358,34 @@ function updateHistory(lastMovedPiece){ // this function is used to update the m
     moveHistory.push([temp, lastMovedPiece]);
 }
 
+function changeEnemy(newEnemy){ // this function is used to change the enemy when loading a scenario
+    if (newEnemy == "player"){
+        enemy = "player";
+        document.getElementById("btnradio1").checked = true;
+        document.getElementById("undoRedo").innerHTML = '<button class="btn-lg btn-primary w-50" id="undo" onclick="Undo()">Undo</button><button class="btn-lg btn-primary w-50" id="redo" onclick="Redo()">Redo</button>';
+    }else{
+        enemy = "bot";
+        document.getElementById("btnradio2").checked = true;
+        document.getElementById("undoRedo").innerHTML = "";
+    }
+}
+
 function resetGame(){ // this function is used to reset the game, it is called when the game is started and when the reset button is pressed
+    // , [[[null,null,null,null],null]], 0, ["early", "early"], "player"
     gameGrid = [];
+    console.log(allGridLayouts[scenario]);
+    //moveHistory = allGridLayouts[scenario][1][2];                   // this has to be fixed later///////////////////////////////////////////
     moveHistory = [];
+    historyOffset = allGridLayouts[scenario][1][3];
+    faze = allGridLayouts[scenario][1][4];
+    currentPlayer = allGridLayouts[scenario][1][1];
+    changeEnemy(allGridLayouts[scenario][1][5]);
     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-    availableMoves = [];
-    specialMoves = [];
-    highlightedTiles = [];
-    checkedKing = [];
-    faze = "early";
+    availableMoves = allGridLayouts[scenario][1][6];
+    specialMoves = allGridLayouts[scenario][1][7];
+    highlightedTiles = allGridLayouts[scenario][1][8];
+    checkedKing = allGridLayouts[scenario][1][9];
+    console.log(checkedKing);
     for (let i = 0; i < 8; i++){
         gameGrid.push([]);
         for (let j = 0; j < 8; j++){
@@ -1302,19 +1394,24 @@ function resetGame(){ // this function is used to reset the game, it is called w
     }
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
-            if (gameGridLayout[0][y][x] != null && scenario == 0) {
-                gameGrid[y][x] = new gameGridLayout[0][y][x][0](x, y, gameGridLayout[0][y][x][1]);
-                currentPlayer = gameGridLayout[1];
-            }else if (checkmateScenarioBlack[0][y][x] != null && scenario == 1){
-                gameGrid[y][x] = new checkmateScenarioBlack[0][y][x][0](x, y, checkmateScenarioBlack[0][y][x][1]);
-                currentPlayer = checkmateScenarioBlack[1];
-            }else if (checkmateScenarioWhite[0][y][x] != null && scenario == 2){
-                gameGrid[y][x] = new checkmateScenarioWhite[0][y][x][0](x, y, checkmateScenarioWhite[0][y][x][1]);
-                currentPlayer = checkmateScenarioWhite[1];
+            if (allGridLayouts[scenario][1][0][y][x]){
+                //console.log(allGridLayouts[scenario][1][0][y][x]);
+                gameGrid[y][x] = new allGridLayouts[scenario][1][0][y][x][0](x, y, allGridLayouts[scenario][1][0][y][x][1]);
+                gameGrid[y][x].numMoves = allGridLayouts[scenario][1][0][y][x][2];
             }
         }
     }
-    updateHistory(null);
+    console.log(checkedKing);
+    //console.log(allGridLayouts[scenario][1][1]);
+    //updateHistory(null);                                         // I am not surre if this needs to be here
+}
+
+function makeOptions(){ // this function is used to fill the select spinner with available scenarios
+    let select = document.getElementById("scenario");
+    select.innerHTML = "";
+    for (let i = 0; i < allGridLayouts.length; i++){
+        select.innerHTML += '<option value="' + i + '">' + allGridLayouts[i][0] + '</option>';
+    }
 }
 
 function setup() { // simple setup function that creates the canvas and calls the resetGame function to fill in the new game grid
@@ -1324,6 +1421,7 @@ function setup() { // simple setup function that creates the canvas and calls th
     canvas = createCanvas(size, size);
     baseSize = height / 8;
     canvas.parent('chessboard');
+    makeOptions();
     changeScenario();
 }
 
@@ -1444,8 +1542,11 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             currentPlayer = currentPlayer == "white" ? "black": "white";
             enemyPlayer = currentPlayer == "white" ? "black" : "white";
             document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-            if (numberOfPieces(gameGrid, "white") < 10 && numberOfPieces(gameGrid, "black") < 10){
-                faze = "late";
+            if (numberOfPieces(gameGrid, "white")){
+                faze[0] = "late";
+            }
+            if(numberOfPieces(gameGrid, "black")){
+                faze[1] = "late";
             }
             if (checkWin(gameGrid, currentPlayer) == "win"){
                 document.getElementById("currentPlayerText").textContent = "Player " + enemyPlayer + " wins!";
