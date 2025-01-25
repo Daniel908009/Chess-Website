@@ -712,7 +712,6 @@ let faze = ["early", "early"];
 
 function changeScenario(){ // function for changing scenarios
     scenario = document.getElementById("scenario").selectedIndex;
-    //console.log(scenario);
     resetGame();
 }
 
@@ -725,7 +724,7 @@ let gameGridLayout = [[ // this is the layout of the game, the 1 and 2 represent
     [null, null, null, null, null, null, null, null],
     [[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0],[Pawn, 2, 0]],
     [[Rook, 2, 0], [Knight, 2, 0], [Bishop, 2, 0], [Queen, 2, 0], [King, 2, 0], [Bishop, 2, 0], [Knight, 2, 0], [Rook, 2, 0]],
-], "white", [[[null,null,null,null],null]], 0, ["early", "early"], "player", [], [], [], []];
+], "white", [], 0, ["early", "early"], "player", [], [], [], []];
 
 let checkmateScenarioBlack = [[ // this is a layout used for testing the bots decision making
     [null, null, null, null, null, null, null, null],
@@ -736,7 +735,7 @@ let checkmateScenarioBlack = [[ // this is a layout used for testing the bots de
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 2, 0]],
-], "white", [[[null,null,null,null],null]], 0, ["early", "early"], "bot", [], [], [], []];
+], "white", [], 0, ["early", "early"], "bot", [], [], [], []];
 
 let checkmateScenarioWhite = [[ // this is the same as blacks checkmate but reversed
     [null, null, null, null, null, null, null, null],
@@ -747,7 +746,7 @@ let checkmateScenarioWhite = [[ // this is the same as blacks checkmate but reve
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 1, 0]],
-], "black", [[[null,null,null,null],null]], 0, ["early", "early"], "bot", [], [], [], []];
+], "black", [], 0, ["early", "early"], "bot", [], [], [], []];
 
 let allGridLayouts = [["Full game", gameGridLayout, false], ["Checkmate Black", checkmateScenarioBlack, false], ["Checkmate White", checkmateScenarioWhite, false]]
 
@@ -769,29 +768,55 @@ let historyOffset = 0;
 let enemy = "player";
 
 function Undo(){ // function for undoing the a move
-    if (moveHistory.length - historyOffset > 1){
+    if (moveHistory.length - historyOffset >= 1){
         historyOffset++;
         if (moveHistory.length - historyOffset < 0){
             historyOffset--;
             return;
         }
-        let movedPiece = null;
-        for (let i = 0; i < 8; i++){
-            for (let j = 0; j < 8; j++){
-                let t = moveHistory.length - historyOffset - 1;
-                if (moveHistory[t][0][i][j] != null){
-                    gameGrid[i][j] = moveHistory[t][0][i][j];
-                    gameGrid[i][j].x = j;
-                    gameGrid[i][j].y = i;
-                    movedPiece = gameGrid[i][j];
-                }else{
-                    gameGrid[i][j] = null;
-                }
+        let oldX = moveHistory[moveHistory.length - historyOffset][0][0];
+        let oldY = moveHistory[moveHistory.length - historyOffset][0][1];
+        let newX = moveHistory[moveHistory.length - historyOffset][1][0];
+        let newY = moveHistory[moveHistory.length - historyOffset][1][1];
+        let takenPiece = null;
+        //console.log(moveHistory[moveHistory.length - historyOffset]);
+        let name = "";
+        if (moveHistory[moveHistory.length - historyOffset][2] != null){
+            name = moveHistory[moveHistory.length - historyOffset][2][0];
+        }
+        if (name != ""){ // a horific way to do this, but it works
+            if (name == "Pawn"){
+                takenPiece = new Pawn(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
+            }else if (name == "Rook"){
+                takenPiece = new Rook(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
+            }else if (name == "Bishop"){
+                takenPiece = new Bishop(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
+            }else if (name == "Knight"){
+                takenPiece = new Knight(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
+            }else if (name == "King"){
+                takenPiece = new King(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
+            }else if (name == "Queen"){
+                takenPiece = new Queen(newX, newY, moveHistory[moveHistory.length - historyOffset][2][1]);
+                takenPiece.numMoves = moveHistory[moveHistory.length - historyOffset][2][2];
             }
         }
-        moveHistory[moveHistory.length - historyOffset][1].numMoves--;
+        gameGrid[oldY].splice(oldX, 0);
+        gameGrid[oldY].splice(oldX, 1, gameGrid[newY][newX]);
+        gameGrid[oldY][oldX].x = oldX;
+        gameGrid[oldY][oldX].y = oldY;
+        gameGrid[oldY][oldX].numMoves--;
+        //console.log("//////////////////////////")
+        gameGrid[newY].splice(newX, 0);
+        gameGrid[newY].splice(newX, 1, takenPiece);
         currentPlayer = currentPlayer == "white" ? "black" : "white";
         document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+        let movedPiece = gameGrid[oldY][oldX];
+        //console.log(gameGrid);
         highlightTiles(movedPiece);
     }
 }
@@ -803,18 +828,22 @@ function Redo(){ // function for redoing a move
             historyOffset++;
             return;
         }
-        for (let i = 0; i < 8; i++){
-            for (let j = 0; j < 8; j++){
-                let t = moveHistory.length - historyOffset - 1;
-                if (moveHistory[t][0][i][j] != null){
-                    gameGrid[i][j] = moveHistory[t][0][i][j];
-                    gameGrid[i][j].x = j;
-                    gameGrid[i][j].y = i;
-                }else{
-                    gameGrid[i][j] = null;
-                }
-            }
+        //console.log(moveHistory);
+        //console.log(moveHistory.length - historyOffset);
+        let oldX = moveHistory[moveHistory.length - historyOffset-1][0][0];
+        let oldY = moveHistory[moveHistory.length - historyOffset-1][0][1];
+        let newX = moveHistory[moveHistory.length - historyOffset-1][1][0];
+        let newY = moveHistory[moveHistory.length - historyOffset-1][1][1];
+        if (gameGrid[newY][newX] != null){
+            takenPiece = [gameGrid[newY][newX].type, gameGrid[newY][newX].player, gameGrid[newY][newX].numMoves];
         }
+        gameGrid[newY].splice(newX, 0);
+        gameGrid[newY].splice(newX, 1, gameGrid[oldY][oldX]);
+        gameGrid[newY][newX].x = newX;
+        gameGrid[newY][newX].y = newY;
+        gameGrid[newY][newX].numMoves++;
+        gameGrid[oldY].splice(oldX, 0);
+        gameGrid[oldY].splice(oldX, 1, null);
         try{
             moveHistory[moveHistory.length - historyOffset - 1][1].numMoves++;
         } catch{}
@@ -836,9 +865,7 @@ function saveGame(){ // function that saves the current game as a layout for a s
 }
 
 function importGame(){ // function for importing games from a json file
-    //console.log("importing");
     let file = document.getElementById("Import").files[0];
-    //console.log(file);
     if (file == null || file.type != "application/json"){
         alert("Please select a json file");
         return;
@@ -848,7 +875,6 @@ function importGame(){ // function for importing games from a json file
     reader.onload = function(){
         let game = JSON.parse(reader.result);
         let grid = [];
-        //console.log(game.convertedGrid);
         for (let i = 0; i < 8; i++){
             grid.push([]);
             for (let j = 0; j < 8; j++){
@@ -875,21 +901,18 @@ function importGame(){ // function for importing games from a json file
         makeOptions();
         scenario = allGridLayouts.length - 1;
         document.getElementById("scenario").selectedIndex = scenario;
-        console.log(scenario + " scenario");
+        //console.log(scenario + " scenario");
         document.getElementById("Import").value = "";
-        //console.log(allGridLayouts);
         resetGame();
     }
 }
 
 function exportGame(){ // function for exporting the game to a json file
-    //console.log("exporting");
     let name = document.getElementById("name").value;
     if (name == ""){
         name = "game";
     }
     let convertedGrid = []; // the gameGrid is converted to a format that can be exported to a json file
-    let convertedHistory = []; // same for the moveHistory
     for (let i = 0; i < 8; i++){
         convertedGrid.push([]);
         for (let j = 0; j < 8; j++){
@@ -900,18 +923,10 @@ function exportGame(){ // function for exporting the game to a json file
             }
         }
     }
-    //console.log(moveHistory);
-    for (let i = 0; i < moveHistory.length; i++){
-        if (moveHistory[i][1] == null){
-            convertedHistory.push([[moveHistory[i][0].type, moveHistory[i][0].player, moveHistory[i][0].numMoves, moveHistory[i][0].value], null]);
-            continue;
-        }
-        convertedHistory.push([[moveHistory[i][0].type, moveHistory[i][0].player, moveHistory[i][0].numMoves, moveHistory[i][0].value], [moveHistory[i][1].type, moveHistory[i][1].player, moveHistory[i][1].numMoves, moveHistory[i][1].value]]);
-    }
     let game = {
         "convertedGrid": convertedGrid,
         "currentPlayer": currentPlayer,
-        "convertedHistory": convertedHistory,
+        "moveHistory": moveHistory,
         "historyOffset": historyOffset,
         "faze": faze,
         "enemy": enemy,
@@ -922,12 +937,12 @@ function exportGame(){ // function for exporting the game to a json file
         "checkedKing": checkedKing
     };
     //console.log(game);
+    //return;
     let json = JSON.stringify(game);
     let link = document.createElement('a');
     let blob = new Blob([json], {type: "application/json"});
     link.href = URL.createObjectURL(blob);
     link.download = name + ".json";
-    //return;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -958,7 +973,6 @@ function deleteGame(){ // function that deletes the game from all places where t
     makeOptions();
     changeScenario();
     resetGame();
-    //console.log(allGridLayouts);
 }
 
 function numberOfPieces(grid, player){ // function that counts the number of pieces of a player, it is mainly used for checking if the game is in late game or early game
@@ -1004,17 +1018,13 @@ function valuePlayersPieces(grid, player){ // this function is used by the bot t
                 for (let k = 0; k < tableOfTables.length; k++){
                     if(grid[i][j].type == tableOfTables[k][0]){
                         index = k;
-                        //console.log(index);
                     }
                 }
                 if (grid[i][j].type != "King" && grid[i][j].type == tableOfTables[index][0]){
                     value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
                 }else if (faze[nP - 1] == "early"){
-                    //console.log("here");
                     value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
                 }else if (faze[nP - 1] == "late"){
-                    //console.log("here");
-                    //console.log(tableOfTables[index]);
                     value = value + tableOfTables[index][grid[i][j].player + 2][i][j]/100;
                 }
             }
@@ -1339,23 +1349,14 @@ function checkWin(grid, player){ // this function checks if a player has won, it
     return "no winner";
 }
 
-function updateHistory(lastMovedPiece){ // this function is used to update the move history, it is called after every move, and its used for the undo and redo functions
-    let temp = [];
-    for (let i = 0; i < 8; i++){
-        temp.push([]);
-        for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null){
-                temp[i].push(gameGrid[i][j]);
-            }else{
-                temp[i].push(null);
-            }
-        }
-    }
+function updateHistory(oldPos, newPos, takenPiece){ // this function is used to update the move history, it is called after every move, and its used for the undo and redo functions
+    //console.log("ran");
     if (historyOffset > 0){
         moveHistory.splice(moveHistory.length - historyOffset, historyOffset);
         historyOffset = 0;
     }
-    moveHistory.push([temp, lastMovedPiece]);
+    moveHistory.push([[oldPos.x, oldPos.y], newPos, takenPiece]);
+    //console.log(moveHistory);
 }
 
 function changeEnemy(newEnemy){ // this function is used to change the enemy when loading a scenario
@@ -1371,11 +1372,10 @@ function changeEnemy(newEnemy){ // this function is used to change the enemy whe
 }
 
 function resetGame(){ // this function is used to reset the game, it is called when the game is started and when the reset button is pressed
-    // , [[[null,null,null,null],null]], 0, ["early", "early"], "player"
     gameGrid = [];
-    console.log(allGridLayouts[scenario]);
-    //moveHistory = allGridLayouts[scenario][1][2];                   // this has to be fixed later///////////////////////////////////////////
-    moveHistory = [];
+    //console.log(allGridLayouts[scenario]);
+    moveHistory = allGridLayouts[scenario][1][2];
+    //console.log(moveHistory);
     historyOffset = allGridLayouts[scenario][1][3];
     faze = allGridLayouts[scenario][1][4];
     currentPlayer = allGridLayouts[scenario][1][1];
@@ -1385,7 +1385,6 @@ function resetGame(){ // this function is used to reset the game, it is called w
     specialMoves = allGridLayouts[scenario][1][7];
     highlightedTiles = allGridLayouts[scenario][1][8];
     checkedKing = allGridLayouts[scenario][1][9];
-    console.log(checkedKing);
     for (let i = 0; i < 8; i++){
         gameGrid.push([]);
         for (let j = 0; j < 8; j++){
@@ -1395,15 +1394,11 @@ function resetGame(){ // this function is used to reset the game, it is called w
     for (let x = 0; x < 8; x++) {
         for (let y = 0; y < 8; y++) {
             if (allGridLayouts[scenario][1][0][y][x]){
-                //console.log(allGridLayouts[scenario][1][0][y][x]);
                 gameGrid[y][x] = new allGridLayouts[scenario][1][0][y][x][0](x, y, allGridLayouts[scenario][1][0][y][x][1]);
                 gameGrid[y][x].numMoves = allGridLayouts[scenario][1][0][y][x][2];
             }
         }
     }
-    console.log(checkedKing);
-    //console.log(allGridLayouts[scenario][1][1]);
-    //updateHistory(null);                                         // I am not surre if this needs to be here
 }
 
 function makeOptions(){ // this function is used to fill the select spinner with available scenarios
@@ -1490,6 +1485,10 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                     }
                 }
             }
+            let takenPiece = null;
+            if (gameGrid[y][x] != null){
+                takenPiece = [gameGrid[y][x].type, gameGrid[y][x].player, gameGrid[y][x].numMoves];
+            }
             gameGrid[y][x] = gameGrid[selected.y][selected.x];
             gameGrid[y][x].x = x;
             gameGrid[y][x].y = y;
@@ -1559,7 +1558,7 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                     alert("Draw!");
                 }, 100);
             }
-            updateHistory(gameGrid[y][x]);
+            updateHistory(selected, [x, y], takenPiece);
             if (enemy == "bot" && currentPlayer == "black"){
                 enemyDecision();
                 currentPlayer = "white";
@@ -1588,7 +1587,8 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             }
         }
     }
-    console.log(valuePlayersPieces(gameGrid, "white"));
+    //console.log(valuePlayersPieces(gameGrid, "white"));
+    //console.log(moveHistory);
 }
 
 function draw() { // this is the main function of the game, it is called 60 times per second, it is predefined by p5.js
