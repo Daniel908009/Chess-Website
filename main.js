@@ -872,13 +872,88 @@ function Redo(){ // function for redoing a move
     }
 }
 
-function saveGame(){ // function that saves the current game as a layout for a scenario, also saves the scenario to local storage
-    console.log("saving");
-    document.getElementById("nameLocal").value = "";
+function deleteAll(){ // function for deleting all extra scenarios from the game and local storage
+    allGridLayouts = allGridLayouts.slice(0, 4); // this is not scalable, but it doesnt matter since there will not be more than 4 base scenarios
+    scenario = 0;
+    makeOptions();
+    localStorage.clear();
+}
+
+function saveGame(n){ // function that saves the current game as a layout for a scenario, also saves the scenario to local storage
+    localStorage.clear();
+    let name = document.getElementById("name").value;
+    if (n == null){
+        if (name == ""){
+        name = "game";
+        }
+    }else if (n != null){
+        name = n;
+    }
+    let layout = [];
+    for (let i = 0; i < 8; i++){
+        layout.push([]);
+        for (let j = 0; j < 8; j++){
+            if (gameGrid[i][j] == null){
+                layout[i].push(null);
+            }else{ // the layout has to have constructors for the pieces
+                layout[i].push([gameGrid[i][j].constructor, gameGrid[i][j].player, gameGrid[i][j].numMoves]);
+            }
+        }
+    }
+    allGridLayouts.push([name, [layout, currentPlayer, moveHistory, historyOffset, faze, enemy, availableMoves, specialMoves, highlightedTiles, checkedKing], true]);
+    makeOptions();
+    scenario = allGridLayouts.length - 1;
+    document.getElementById("scenario").selectedIndex = scenario;
+    document.getElementById("name").value = "";
+    let allConvertedLayouts = []; // all grids are converted and saved at once into local storage
+    for(let i = 0; i < allGridLayouts.length; i++){
+        let saveG = allGridLayouts[i][1][0];
+        let convertedGrid = []; // the gameGrid is converted to a format that can be saved to local storage
+        for (let i = 0; i < 8; i++){
+            convertedGrid.push([]);
+            for (let j = 0; j < 8; j++){
+                if (saveG[i][j] == null){
+                    convertedGrid[i].push(null);
+                }else{
+                    if (saveG[i][j][0] == Pawn){ // horific way to do this-works
+                        convertedGrid[i].push(["Pawn", saveG[i][j][1], saveG[i][j][2]]);
+                    }else if (saveG[i][j][0] == Rook){
+                        convertedGrid[i].push(["Rook", saveG[i][j][1], saveG[i][j][2]]);
+                    }else if (saveG[i][j][0] == Bishop){
+                        convertedGrid[i].push(["Bishop", saveG[i][j][1], saveG[i][j][2]]);
+                    }else if (saveG[i][j][0] == Knight){
+                        convertedGrid[i].push(["Knight", saveG[i][j][1], saveG[i][j][2]]);
+                    }else if (saveG[i][j][0] == King){
+                        convertedGrid[i].push(["King", saveG[i][j][1], saveG[i][j][2]]);
+                    }else if (saveG[i][j][0] == Queen){
+                        convertedGrid[i].push(["Queen", saveG[i][j][1], saveG[i][j][2]]);
+                    }
+                }
+            }
+        }
+        let game = {
+            "convertedGrid": convertedGrid,
+            "currentPlayer": allGridLayouts[i][1][1],
+            "moveHistory": allGridLayouts[i][1][2],
+            "historyOffset": allGridLayouts[i][1][3],
+            "faze": allGridLayouts[i][1][4],
+            "enemy": allGridLayouts[i][1][5],
+            "name": allGridLayouts[i][0],
+            "availableMoves": allGridLayouts[i][1][6],
+            "specialMoves": allGridLayouts[i][1][7],
+            "highlightedTiles": allGridLayouts[i][1][8],
+            "checkedKing": allGridLayouts[i][1][9],
+            "canBeDeleted": allGridLayouts[i][2]
+        };
+        console.log(allGridLayouts[i]);
+        allConvertedLayouts.push(game);
+    }
+    localStorage.setItem("games", JSON.stringify(allConvertedLayouts));
 }
 
 function importGame(){ // function for importing games from a json file
     let file = document.getElementById("Import").files[0];
+    let name = file.name;
     if (file == null || file.type != "application/json"){ // checking that the user selected the right file
         alert("Please select a json file");
         return;
@@ -911,8 +986,7 @@ function importGame(){ // function for importing games from a json file
                     }
                 }
             }
-            allGridLayouts.push([game.name, [grid, game.currentPlayer, game.moveHistory, game.historyOffset, game.faze, game.enemy, game.availableMoves, game.specialMoves, game.highlightedTiles, game.checkedKing], true]);
-            makeOptions();
+            saveGame(name);
             scenario = allGridLayouts.length - 1;
             document.getElementById("scenario").selectedIndex = scenario;
             document.getElementById("Import").value = "";
@@ -1202,6 +1276,58 @@ window.addEventListener('resize', function () { // this ensures that canvas is r
     resizeCanvasFunc();
 }
 )
+document.addEventListener("fullscreenchange", function () { // this ensures that canvas is resized when the window is put in the fullscreen mode
+    resizeCanvasFunc();
+}
+)
+document.addEventListener("webkitfullscreenchange", function () { // this ensures resizing in safari
+    resizeCanvasFunc();
+}
+)
+document.addEventListener("mozfullscreenchange", function () { // this ensures resizing in firefox
+    resizeCanvasFunc();
+}
+)
+document.addEventListener("msfullscreenchange", function () { // this ensures resizing in edge
+    resizeCanvasFunc();
+}
+)
+
+function loadingLayouts(){ // this function is used to load the game layouts from local storage and converting them to a usable format
+    let games = JSON.parse(localStorage.getItem("games"));
+    if (typeof games == "undefined" || games == null){
+        return;
+    }
+    allGridLayouts = [];
+    let grid = [];
+    for (let i = 0; i < games.length; i++){
+        let cGrid = games[i]["convertedGrid"];
+        grid = [];
+        for (let j = 0; j < 8; j++){
+            grid.push([]);
+            for (let k = 0; k < 8; k++){
+                if (cGrid[j][k] != null){
+                    if (cGrid[j][k][0] == "Pawn"){
+                        grid[j].push([Pawn, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }else if (cGrid[j][k][0] == "Rook"){
+                        grid[j].push([Rook, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }else if (cGrid[j][k][0] == "Bishop"){
+                        grid[j].push([Bishop, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }else if (cGrid[j][k][0] == "Knight"){
+                        grid[j].push([Knight, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }else if (cGrid[j][k][0] == "King"){
+                        grid[j].push([King, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }else if (cGrid[j][k][0] == "Queen"){
+                        grid[j].push([Queen, cGrid[j][k][1], cGrid[j][k][2]]);
+                    }
+                }else{
+                    grid[j].push(null);
+                }
+            }
+        }
+        allGridLayouts.push([games[i]["name"], [grid, games[i]["currentPlayer"], games[i]["moveHistory"], games[i]["historyOffset"], games[i]["faze"], games[i]["enemy"], games[i]["availableMoves"], games[i]["specialMoves"], games[i]["highlightedTiles"], games[i]["checkedKing"]], games[i]["canBeDeleted"]]);
+    }
+}
 
 function removeLostMoves(moves, player, movingPiece){ // this function is used to remove moves of a piece that would put the pieces king in check, it is called by every pieces GetMoves function except kings
     let answer = [];
@@ -1441,6 +1567,7 @@ function setup() { // simple setup function that creates the canvas and calls th
     canvas = createCanvas(size, size);
     baseSize = height / 8;
     canvas.parent('chessboard');
+    loadingLayouts();
     makeOptions();
     changeScenario();
 }
