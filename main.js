@@ -1126,6 +1126,8 @@ function valuePlayersPieces(grid, player){ // this function is used by the bot t
 // two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
 let controlVariable = 0;
 let scores = [];
+let controlScores = [];
+let winningDepth = null;
 
 function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is a recursive function used by the bot to evaluate moves of the board
     // this is all still under construction, but can be experienced in the current state of the game
@@ -1161,13 +1163,22 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             grid[newY][newX].y = newY;
             if (checkWin(grid, "white", false) == "win"){
                 scores[scorePos][2] += parseInt(10000 - depth*1000);
+                if (winningDepth == null || winningDepth > depth){
+                    winningDepth = depth;
+                }
+                console.log("winning move");
             }else if(checkWin(grid, "black", false) == "win" || checkWin(grid, "white", false) == "draw"){
                 scores[scorePos][2] -= parseInt(10000 - depth*1000);
                 losingMove = true;
+                console.log("losing move");
             }
-            scores[scorePos][2] += parseInt(valuePlayersPieces(grid, "black") - valuePlayersPieces(grid, "white"));
+            scores[scorePos][2] += parseFloat(parseInt(valuePlayersPieces(grid, "black") - valuePlayersPieces(grid, "white")) * 100) / 100;
             if (depth < desiredDepth && !losingMove){
-                recursiveFunc(grid, player, depth + 1, desiredDepth, scorePos);
+                if (winningDepth == null || winningDepth > depth){
+                    recursiveFunc(grid, player, depth + 1, desiredDepth, scorePos);
+                }else{
+                    console.log("stoped inside the recursion");
+                }
             }
             grid[newY].splice(newX, 0);
             grid[newY].splice(newX, 1, tInPlace);
@@ -1200,9 +1211,10 @@ function makeMove(move){ // this function is used by the bot to make the selecte
 function enemyDecision(){ // this is the main function of the bot, it is called when its bots turn
     // under construction
     let bestMove = [];
-    let desiredDepth = 3; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
+    let desiredDepth = 2; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
     // current maximum is 4, its not really simple to go further since websites can only run on a single thread and because at level 4 its already 160 000 possible move combinations
     // I have a plan for making it go deeper, all the way to level 8, but it will take a lot of time to implement, since recursive functions are hard to debug
+    winningDepth = null;
     scores = [];
     for (let i = 0; i < 8; i++){ // this loop fils up the scores with possible moves, because only the first round of moves actually need scoring, the other moves after them just simply give their score to one of these moves
         for (let j = 0; j < 8; j++){
@@ -1219,7 +1231,7 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         let oX = movingPiece.x;
         let oY = movingPiece.y;
         let tInPlace = gameGrid[scores[i][4]][scores[i][3]];
-        let losingMove = false;
+        let endingMove = false;
         // moving the piece to the new place and checking how would that affect the board and the score
         gameGrid[movingPiece.y].splice(movingPiece.x, 0);
         gameGrid[movingPiece.y].splice(movingPiece.x, 1, null);
@@ -1229,14 +1241,27 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
         if (checkWin(gameGrid, "white", false) == "win"){
             scores[i][2] = parseInt(scores[i][2] + 10000);
+            console.log("winning move");
+            winningDepth = 0;
+            /*if (winningDepth != null){
+                controlScores.push(i + " here");
+            }*/
         }else if (checkWin(gameGrid, "black") == "win" || checkWin(gameGrid, "white", false) == "draw"){
             scores[i][2] = parseInt(scores[i][2] - 10000);
             console.log("losing move");
-            losingMove = true;
+            endingMove = true;
+            /*if (winningDepth != null){
+                controlScores.push(i + " there");
+            }*/
         }
-        scores[i][2] = parseInt(scores[i][2] + valuePlayersPieces(gameGrid, "black") - valuePlayersPieces(gameGrid, "white")); // evaluating both players pieces, this makes the AI more smart and it makes the game far more interesting
-        if (!losingMove){ // if the move isnt a move that would cause a loss imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
-            recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth, i);
+        scores[i][2] = parseInt(parseFloat(scores[i][2] + valuePlayersPieces(gameGrid, "black") - valuePlayersPieces(gameGrid, "white")) * 100) / 100; // evaluating both players pieces, this makes the AI more smart and it makes the game far more interesting
+
+        if (!endingMove && 1 < desiredDepth){ // if the move isnt a move that would cause a loss imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
+            if (winningDepth == null || winningDepth > 0){
+                recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth, i);
+            }else{
+                console.log("something got stopped");
+            }
         }
         // reseting the grid to its original state, so that the next move can be tested on the original board
         gameGrid[scores[i][4]].splice(scores[i][3], 0);
@@ -1246,6 +1271,7 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         gameGrid[oY][oX].x = oX;
         gameGrid[oY][oX].y = oY;
     }
+    return; // just for testing
     console.log(controlVariable);
     controlVariable = 0;
     console.log(scores);
