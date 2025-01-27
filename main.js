@@ -790,7 +790,7 @@ let baseSize = 0;
 let moveHistory = [];
 let historyOffset = 0;
 let enemy = "player";
-let whosBot = 1;
+let whosBot = 2;
 
 function Undo(){ // function for undoing the a move
     if (moveHistory.length - historyOffset >= 1){
@@ -1055,9 +1055,20 @@ function exportGame(){ // function for exporting the game to a json file
 }
 
 function changePlayersColour(){ // function for changing the colour of the player when the enemy is a bot
-    whosBot = document.getElementById("ChangeColour").selectedIndex == 0 ? 1:0;
-    if(whosBot == currentPlayer == "white" ? 0 : 1){
-        //enemyDecision();   // for now its disabled but it will be enabled once I change the bot to be able to play as white as well
+    whosBot = document.getElementById("ChangeColour").selectedIndex == 0 ? 1:2;
+    console.log(whosBot);
+    if(whosBot == currentPlayer == "white" ? 1:2){
+        console.log("this ran");
+        enemyDecision();
+        //console.log(currentPlayer);
+        currentPlayer = currentPlayer == "white" ? "black" : "white";
+        document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
+        if (checkWin(gameGrid, whosBot == 1 ? "black" : "white", true, true) == "win"){
+            let player = currentPlayer == "white" ? "black" : "white";
+            document.getElementById("currentPlayerText").textContent = "Player " + player + " wins!";
+        }else if (checkWin(gameGrid, whosBot == 1 ? "black" : "white", true, true) == "draw"){
+            document.getElementById("currentPlayerText").textContent = "Draw!";
+        }
     }
 }
 
@@ -1279,14 +1290,14 @@ function resScores(scores){ // this function is used to restructure the scores a
 function enemyDecision(){ // this is the main function of the bot, it is called when its bots turn
     // under construction
     let bestMove = [];
-    let desiredDepth = 2; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
+    let desiredDepth = 1; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
     // current maximum is 4, its not really simple to go further since websites can only run on a single thread and because at level 4 its already 160 000 possible move combinations
     // I have a plan for making it go deeper, all the way to level 8, but it will take a lot of time to implement, since recursive functions are hard to debug
     winningDepth = 10000000000000;
     scores = [];
     for (let i = 0; i < 8; i++){ // this loop fils up the scores with possible moves, because only the first round of moves actually need scoring, the other moves after them just simply give their score to one of these moves
         for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null && gameGrid[i][j].player == 2){
+            if (gameGrid[i][j] != null && gameGrid[i][j].player == whosBot){
                 let moves = gameGrid[i][j].GetMoves(true);
                 //console.log("---------------------------");
                 //console.log(moves);
@@ -1317,18 +1328,18 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
             gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
             gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
             gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-            if (checkWin(gameGrid, "white", false, false) == "win"){
+            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, false) == "win"){ //"white"
                 scores[i][2].push([0, 10000]);
                 //console.log("winning move number: " + i);
                 winningDepth = 0;
                 endingMove = true;
-            }else if (checkWin(gameGrid, "black", false, false) == "win" || checkWin(gameGrid, "white", false, false) == "draw"){
+            }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, false) == "win" || checkWin(gameGrid, "white", false, false) == "draw"){ // black
                 scores[i][2].push([0, - 10000]);
                 //console.log("losing move");
                 endingMove = true;
             }
-            //console.log(i + " +++++ ", valuePlayersPieces(gameGrid, "white"));
-            scores[i][2].push([0, parseInt(parseFloat(valuePlayersPieces(gameGrid, "black") - valuePlayersPieces(gameGrid, "white")) * 100) / 100]); // evaluating both players pieces, this makes the AI more smart and it makes the game far more interesting
+            //console.log(i + " +++++ ", valuePlayersPieces(gameGrid, "white")); // black - white
+            scores[i][2].push([0, parseInt(parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black": "white")) * 100) / 100]); // evaluating both players pieces, this makes the AI more smart and it makes the game far more interesting
             if (!endingMove && 1 < desiredDepth && 1 < winningDepth){ // if the move isnt a move that would cause a loss imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
                 recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth, i);
             }
@@ -1894,7 +1905,7 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                 }, 100);
             }
             updateHistory(selected, [x, y], takenPiece);
-            if (enemy == "bot" && currentPlayer == "black"){
+            if (enemy == "bot" && currentPlayer == whosBot == 1 ? "white" : "black"){
                 let t = enemyDecision();
                 if (!t){
                     let oppositePlayer = currentPlayer == "white" ? "black" : "white";
