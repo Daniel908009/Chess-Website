@@ -1192,14 +1192,14 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             grid[newY].splice(newX, 1, movedPiece);
             grid[newY][newX].x = newX;
             grid[newY][newX].y = newY;
-            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, false) == "win"){
+            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
                 scores[scorePos][2].push([depth, parseInt(10000 - depth*1000)]);
                 //console.log("win at depth: " + depth);
                 if (winningDepth == null || winningDepth > depth){
                     winningDepth = depth;
                 }
                 endingMove = true;
-            }else if(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, false) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, false) == "draw"){
+            }else if(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
                 scores[scorePos][2].push([depth, parseInt(-10000 + depth*1000)]);
                 endingMove = true;
             }
@@ -1261,6 +1261,11 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
     let desiredDepth = 3; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
     // current maximum is 4, its not really simple to go further since websites can only run on a single thread and because at level 4 its already 160 000 possible move combinations
     // I have a plan for making it go deeper, all the way to level 8, but it will take a lot of time to implement, since recursive functions are hard to debug
+    /*if (numberOfPieces(gameGrid, "white") + numberOfPieces(gameGrid, "black") < 20){
+        desiredDepth = 3;
+    }else{
+        desiredDepth = 2;
+    }*/
     winningDepth = 10000000000000;
     scores = [];
     for (let i = 0; i < 8; i++){ // this loop fils up the scores with possible moves, because only the first round of moves actually need scoring, the other moves after them just simply give their score to one of these moves
@@ -1287,11 +1292,11 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
             gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
             gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
             gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, false) == "win"){
+            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
                 scores[i][2].push([0, 10000]);
                 winningDepth = 0;
                 endingMove = true;
-            }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, false) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, false) == "draw"){
+            }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
                 scores[i][2].push([0, - 10000]);
                 endingMove = true;
             }
@@ -1450,23 +1455,24 @@ let highlightedTiles = []; // this is used in the checkWin function and it is us
 let checkedKing = []; // this is used for highlighting the king that is in check
 
 function highlightTiles(checkingPiece){ // this function highlights the tiles that the player can move to in order to get out of check
+    //console.log(checkingPiece);
     highlightedTiles = [];
     checkedKing = [];
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player != checkingPiece.player){
-                let moves = gameGrid[i][j].GetMoves(false);
+                let moves = gameGrid[i][j].GetMoves(true);
+                //console.log(moves);
                 if(gameGrid[i][j].type == "King"){
                     checkedKing = [i, j];
                 }
-                for (let k = 0; k < moves.length; k++){
-                    if (moves[k][0] == checkingPiece.x && moves[k][1] == checkingPiece.y){
-                        highlightedTiles.push([i, j]);
-                    }
+                if (moves.length != 0 ){
+                    highlightedTiles.push([i, j]);
                 }
             }
         }
     }
+    //console.log(highlightedTiles);
 }
 
 function checkWin(grid, player,c, t){ // this function checks if a player has won, it is used in the actual game and in the bots decision making, it doesnt return true or false because there is a third option - draw
@@ -1544,6 +1550,7 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
                                 gameGrid[moves[k][1]].splice(moves[k][0], 0);
                                 gameGrid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
                                 if(c){ // the c is used to prevent a bug that was caused by the bot exploring the possible moves
+                                    //console.log("this ran");
                                     highlightTiles(checkingPiece);
                                 }
                                 return "no winner";
@@ -1809,27 +1816,23 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                 }, 100);
             }
             updateHistory(selected, [x, y], takenPiece);
-            if (enemy == "bot" && currentPlayer == whosBot == 1 ? "white" : "black"){
+            if (enemy == "bot"){
                 let t = enemyDecision();
+                //console.log(t);
                 if (!t){
-                    let oppositePlayer = currentPlayer == "white" ? "black" : "white";
+                    console.log("here");
                     currentPlayer = currentPlayer == "white" ? "black": "white";
                     document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-                    if (checkWin(gameGrid, oppositePlayer, false, true) == "win"){
-                        document.getElementById("currentPlayerText").textContent = "Player black wins!";
+                    if (checkWin(gameGrid, currentPlayer, true, true) == "win"){
+                        document.getElementById("currentPlayerText").textContent = "Player " + currentPlayer + " wins!";
                         setTimeout(function(){
-                            alert("Player black wins!");
-                        });
-                    }else if (checkWin(gameGrid, oppositePlayer, false, true) == "draw"){
+                            alert("Player " + currentPlayer + " wins!");
+                        }, 100);
+                    }else if (checkWin(gameGrid, currentPlayer, true, true) == "draw"){
                         document.getElementById("currentPlayerText").textContent = "Draw!";
                         setTimeout(function(){
                             alert("Draw!");
-                        });
-                    }else if (checkWin(gameGrid, oppositePlayer == "white" ? "black" : "white", false, true) == "win"){
-                        document.getElementById("currentPlayerText").textContent = "Player white wins!";
-                        setTimeout(function(){
-                            alert("Player white wins!");
-                        });
+                        }, 100);
                     }
                 }
             }
