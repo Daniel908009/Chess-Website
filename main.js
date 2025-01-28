@@ -1217,7 +1217,7 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             grid[newY].splice(newX, 1, movedPiece);
             grid[newY][newX].x = newX;
             grid[newY][newX].y = newY;
-            if (checkWin(grid, "white", false, false) == "win"){
+            if (checkWin(grid, whosBot == 1 ? "black":"white", false, false) == "win"){
                 scores[scorePos][2].push([depth, parseInt(10000 - depth*1000)]);
                 if (winningDepth == null || winningDepth > depth){
                     winningDepth = depth;
@@ -1225,12 +1225,12 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
                 endingMove = true;
                 //console.log("winning move");
                 //console.log("winning move");
-            }else if(checkWin(grid, "black", false, false) == "win" || checkWin(grid, "white", false, false) == "draw"){
+            }else if(checkWin(grid, whosBot == 1 ? "white":"black", false, false) == "win" || checkWin(grid, whosBot == 1 ? "black":"white", false, false) == "draw"){
                 scores[scorePos][2].push([depth, parseInt(-10000 + depth*1000)]);
                 endingMove = true;
                 //console.log("losing move");
             }
-            scores[scorePos][2].push([depth, valuePlayersPieces(grid, "black") - valuePlayersPieces(grid, "white")]);
+            scores[scorePos][2].push([depth, valuePlayersPieces(grid, whosBot == 1 ? "white":"black") - valuePlayersPieces(grid, whosBot == 1 ? "black":"white")]);
             if (depth < desiredDepth && !endingMove && depth < winningDepth){
                 recursiveFunc(grid, player, depth + 1, desiredDepth, scorePos);
             }
@@ -1769,7 +1769,7 @@ function drawPieces() { // this function is for drawing the pieces, it is called
 
 function drawNumbersLetters(){ // this function is used to draw the numbers and letters on the board
     for (let i = 0; i < 8; i++){
-        textSize(32);
+        textSize(baseSize / 2);
         if (i % 2 == 0){
             fill(255);
         }else{
