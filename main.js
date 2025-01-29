@@ -173,6 +173,17 @@ const rookTableBlack = [
     [5, 10, 10, 10, 10, 10, 10, 5],
     [0, 0, 0, 0, 0, 0, 0, 0]
 ];
+/*
+const rookTableBlack = [ // this is  for testing purposes
+    [0, 0, 0, 5, 5, 0, 0, 0],
+    [-5, -5, -5, -5, -5, -5, -5, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [-5, 0, 0, 0, 0, 0, 0, -5],
+    [5, 10, 10, 10, 10, 10, 10, 5],
+    [0, 0, 0, 0, 0, 0, 0, 0]
+];*/
 
 const rookTableWhite = rookTableBlack.slice().reverse();
 
@@ -748,17 +759,28 @@ let checkmateScenarioWhite = [[ // this is the same as blacks checkmate but reve
     [null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, [King, 1, 0]],
 ], "white", [], 0, ["early", "early"], "bot", [], [], [], []]; // added these informations to the end of the layout, so it has the same size? or variables as the imported game layouts
-
+/*
 let checkmateTwoMoves = [[ // this is to test the bots abilities in deeper recursions
 [[King, 1, 1],null,null,null,null,null,null,null],
-[null,null,null,null,null,null,null, [Rook, 2, 1]],
-[null,null,null,null,null,null,null,[Rook, 2, 1]],
+[null,null,null,null,null,[Rook, 2, 1],null, null],
+[null,null,null,null,null,[Rook, 2, 1],null,null],
 [null,null,null,null,null,null,null,null],
 [null,null,null,null,null,null,null,null],
 [null,null,null,null,null,null,null,null],
 [null,null,null,null,null,null,null,null],
 [null,null,null,null,null,null,null,[King, 2, 1]],
-],  "white", [], 0, ["late", "early"], "bot", [], [], [], []];
+],  "white", [], 0, ["late", "early"], "bot", [], [], [], []];*/
+
+let checkmateTwoMoves = [[ // this is to test the bots abilities in deeper recursions
+    [[King, 1, 1],null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null, null],
+    [null,null,[Pawn, 1, 1],null,null,[Rook, 2, 1],null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,[King, 2, 1]],
+    ],  "white", [], 0, ["late", "early"], "bot", [], [], [], []];
 
 // this is the array containing all the different layouts, the base layouts and the imported ones
 // the false at the end of each layout is to determine if the layout is a base layout or not, this is important for the deleteGame function
@@ -1113,18 +1135,42 @@ function numberOfPieces(grid, player){ // function that counts the number of pie
     return count;
 }
 
-function findBestMove(scores){ // this function finds the best move for the bot from the scores array, that is generated in the enemyDecision function
+function evaluateNodeLine(node){ // this function evaluates the value of the node and its parant and its parent, etc.
+    let value = 0;
+    //console.log(node);
+    value = node.value;
+    while(node.parent != null){
+        value += node.parent.value;
+        node = node.parent;
+    }
+    return value;
+}
+
+function findBestMove(nodes){ // this function finds the best move for the bot from the scores array, that is generated in the enemyDecision function
     let bestMove = [];
-    let bestScore = -1000000000;
-    console.log(scores);
-    for (let i = 0; i < scores.length; i++){
-        if (scores[i][2] > bestScore){
-            bestScore = scores[i][2];
-            bestMove = [scores[i][0], scores[i][1], scores[i][3], scores[i][4]];
+    let bestNodesNumber = 0;
+    let bestValue = -100000000
+    console.log(nodes);
+    for (let i = 0; i < nodes.length; i++){
+        //console.log(nodes[i]);
+        for (let j =0; j < nodes[i][1].length; j++){
+            if (evaluateNodeLine(nodes[i][1][j]) > bestValue){
+                bestValue = evaluateNodeLine(nodes[i][1][j]);
+                bestNodesNumber = i;
+                //console.log("best value changed to " + bestValue);
+            }
+        }
+    }
+    //console.log(bestNodesNumber + " is the best nodeline");
+    //console.log(nodes[bestNodesNumber]);
+    for (let x = 0; x < scores.length; x++){
+        //console.log(scores);
+        if (scores[x][2] == nodes[bestNodesNumber][0]){
+            bestMove = [scores[x][0], scores[x][1], scores[x][3], scores[x][4]];
         }
     }
     console.log(bestMove);
-    console.log(bestScore);
+    console.log("with a score of " +bestValue);
     return bestMove;
 }
 
@@ -1154,14 +1200,28 @@ function valuePlayersPieces(grid, player){ // this function is used by the bot t
     return parseFloat(Math.round(value*100) / 100);
 }
 
+class Node{ // this is used during the recursion
+    constructor(player, depth, parent, value){
+        this.player = player;
+        this.depth = depth;
+        this.children = [];
+        this.parent = parent;
+        this.value = value;
+    }
+    addChild(child){
+        this.children.push(child);
+    }
+}
+
 // two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
 let controlVariable = 0;
 let scores = [];
 let controlScores = [];
 let winningDepth = 10000000000000;
 
-function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is a recursive function used by the bot to evaluate moves of the board
+function recursiveFunc(grid, player, depth, desiredDepth, scorePos , NODE){ // this is a recursive function used by the bot to evaluate moves of the board
     // this is all still under construction, but can be experienced in the current state of the game
+    depth++;
     let originalPlayer = player;
     player = player == "white" ? "black" : "white";
     let nP = player == "white" ? 1 : 2;
@@ -1178,6 +1238,7 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
     }
     for (let i =0; i < allMoveOptions.length; i++){ // this loop goes through all the possible moves and evaluates them, and if the desired depth of the recursion has not been reached yet it will create another layer of recursion
         for (let j = 0; j < allMoveOptions[i][1].length; j++){
+            // removing the king from moves to prevent a bug
             controlVariable++;
             let movedPiece = allMoveOptions[i][0];
             let oX = movedPiece.x;
@@ -1192,20 +1253,23 @@ function recursiveFunc(grid, player, depth, desiredDepth, scorePos){ // this is 
             grid[newY].splice(newX, 1, movedPiece);
             grid[newY][newX].x = newX;
             grid[newY][newX].y = newY;
+            //console.log("added child");
+            let value = parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black":"white"));
             if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
-                scores[scorePos][2].push([depth, parseInt(10000 - depth*1000)]);
                 //console.log("win at depth: " + depth);
                 if (winningDepth == null || winningDepth > depth){
                     winningDepth = depth;
                 }
                 endingMove = true;
+                value = parseFloat(value + 10000000)
             }else if(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
-                scores[scorePos][2].push([depth, parseInt(-10000 + depth*1000)]);
                 endingMove = true;
+                value = parseFloat(value - 10000000);
             }
-            scores[scorePos][2].push([depth, parseInt(parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black": "white")) * 100) / 100]);
+            NODE.addChild(new Node(player, depth, NODE, value));
             if (depth < desiredDepth && !endingMove && depth < winningDepth){
-                recursiveFunc(grid, player, depth + 1, desiredDepth, scorePos);
+                //console.log("depth: " + depth, "desiredDepth: " + desiredDepth);
+                recursiveFunc(grid, player == "white" ? "black" : "white", depth, desiredDepth, scorePos, NODE.children[NODE.children.length - 1]);
             }
             grid[newY].splice(newX, 0);
             grid[newY].splice(newX, 1, tInPlace);
@@ -1239,28 +1303,47 @@ function makeMove(move){ // this function is used by the bot to make the selecte
     movingPiece.numMoves++;
 }
 
-function resScores(scores){ // this function is used to restructure the scores array, this is done because of a recursion bug that I couldnt find a different solution for
-    let restructuredScores = [];
-    for (let i = 0; i < scores.length; i++){
-        restructuredScores.push([scores[i][0], scores[i][1], 0, scores[i][3], scores[i][4]]);
-        for(let j = 0; j < scores[i][2].length; j++){
-            if (winningDepth == 10000000000000){
-                restructuredScores[i][2] = parseInt((restructuredScores[i][2] + scores[i][2][j][1]) * 100) / 100;
-            }else if (winningDepth >= scores[i][2][j][0]){
-                restructuredScores[i][2] = parseInt((restructuredScores[i][2] + scores[i][2][j][1]) * 100) / 100;
-            }
-        }
+let answerList = []; // this might be replaced in the future, depends on if it works or not
+function endNodesRecursive(node){ // this function will recursively find the end nodes of a starting move node
+    //console.log(node);
+    let children = node.children;
+    //console.log(children);
+    if (children.length == 0){
+        answerList.push(node);
+        return;
     }
-    return restructuredScores;
+    for (let i = 0; i < children.length; i++){
+        endNodesRecursive(children[i]);
+    }
+    /*console.log("------");
+    console.log(answerList);
+    console.log("------");*/
+}
+
+let nodes = []; // this is an array of the first level depth nodes
+
+function resNodes(){ // this function is used to restructure the scores array, this is done because of a recursion bug that I couldnt find a different solution for
+    //console.log(nodes);
+    //return;
+    let endNodes = [];
+    for (let i = 0; i < nodes.length; i++){
+        answerList = [];
+        endNodesRecursive(nodes[i][1]);
+        endNodes.push([i, answerList]);
+    }
+    /*console.log("-------------------------");
+    console.log("ending nodes here: ");
+    console.log(endNodes);
+    console.log("-------------------------");*/
+    return endNodes;
 }
 
 function enemyDecision(){ // this is the main function of the bot, it is called when its bots turn
     // under construction
     let bestMove = [];
     // 3 is a good balance of speed and like playability??? of the bot
-    let desiredDepth = 3; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
+    let desiredDepth = 2; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
     // current maximum is 4, its not really simple to go further since websites can only run on a single thread and because at level 4 its already 160 000 possible move combinations
-    // I have a plan for making it go deeper, all the way to level 8, but it will take a lot of time to implement, since recursive functions are hard to debug
     /*if (numberOfPieces(gameGrid, "white") + numberOfPieces(gameGrid, "black") < 20){
         desiredDepth = 3;
     }else{
@@ -1268,12 +1351,15 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
     }*/
     winningDepth = 10000000000000;
     scores = [];
+    nodes = [];
+    let num = 0;
     for (let i = 0; i < 8; i++){ // this loop fils up the scores with possible moves, because only the first round of moves actually need scoring, the other moves after them just simply give their score to one of these moves
         for (let j = 0; j < 8; j++){
             if (gameGrid[i][j] != null && gameGrid[i][j].player == whosBot){
                 let moves = gameGrid[i][j].GetMoves(true);
                 for (let k = 0; k < moves.length; k++){
-                    scores.push([i, j, [], moves[k][0], moves[k][1]]);
+                    scores.push([i, j, num, moves[k][0], moves[k][1]]);
+                    num++;
                 }
             }
         }
@@ -1292,17 +1378,20 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
             gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
             gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
             gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
+            let value = parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black":"white"));
             if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
-                scores[i][2].push([0, 10000]);
                 winningDepth = 0;
                 endingMove = true;
+                value = parseFloat(value + 10000000)
             }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
-                scores[i][2].push([0, - 10000]);
                 endingMove = true;
+                value = parseFloat(value - 10000000);
             }
-            scores[i][2].push([0, parseInt(parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black": "white")) * 100) / 100]); // evaluating both players pieces, this makes the AI more smart and it makes the game far more interesting
+            let n = new Node(currentPlayer, 1, null, value);
+            nodes.push([i, n]);
             if (!endingMove && 1 < desiredDepth && 1 < winningDepth){ // if the move isnt a move that would cause a loss imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
-                recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth, i);
+                //console.log("recursion");
+                recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth, i, n);
             }
             // reseting the grid to its original state, so that the next move can be tested on the original board
             gameGrid[scores[i][4]].splice(scores[i][3], 0);
@@ -1313,8 +1402,14 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
             gameGrid[oY][oX].y = oY;
         }
         controlVariable = 0;
-        let restructuredScores = resScores(scores);
-        bestMove = findBestMove(restructuredScores); // finding the best move from the scores array, the one with the highest score is always selected
+        //console.log(nodes);
+        //return;
+        let restructuredNodes = resNodes();
+        /*console.log("restructured nodes");
+        console.log(restructuredNodes);
+        console.log("//////////");*/
+        bestMove = findBestMove(restructuredNodes); // finding the best move from the restructuredNodes array, the one with the highest score is always selected
+        //return;
         makeMove(bestMove); // making the move through a function since there is no simpler way to do it as far as I know
         // this is the part of the code that checks if an end result happened
     }else{
