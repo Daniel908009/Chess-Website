@@ -1076,9 +1076,13 @@ function changePlayersColour(){ // function for changing the colour of the playe
         //console.log("bot is " + whosBot);
         //return;
         //console.log(whosBot);
-        enemyDecision();
+        setTimeout(function(){
+            enemyDecision();
+        }, 50);
         //console.log(currentPlayer);
-        checkWinners();
+        setTimeout(function(){
+            checkWinners();
+        }, 100);
     }
 }
 
@@ -1768,6 +1772,9 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
                             let pieceInPlace = grid[moves[k][1]][moves[k][0]];
                             let ans = false;
                             if (pieceInPlace != null){
+                                if (c){
+                                    highlightTiles(pieceInPlace);
+                                }
                                 return "no winner";
                             }
                             // moving to new place
@@ -1780,6 +1787,9 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
                             grid[i].splice(j, 0);
                             grid[i].splice(j, 1, null);
                             if (!checkCheck(grid, nP)){
+                                if(c){
+                                    highlightTiles(grid[moves[k][1]][moves[k][0]]);
+                                }
                                 ans = true;
                             }
                             // moving piece back to its original place
@@ -1997,6 +2007,7 @@ function checkWinners(){ // this function is used to check if the game is over
             alert("Draw!");
         }, 100);
     }
+    //console.log(highlightedTiles);
 }
 
 function mousePressed() { // this function is called when the mouse is pressed, it is used to for selecting and moving pieces
@@ -2083,14 +2094,17 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             }
             if (enemy == "bot"){
                 //console.log(highlightedTiles);
-                enemyDecision();
+                setTimeout(function(){
+                    enemyDecision();
+                }, 50); // there has to be some delay to allow the board on the page to update
                 //console.log(t);
                 //console.log("here");
             }
             //console.log(currentPlayer);
-            enemyPlayer = currentPlayer == "white" ? "black" : "white";
-            checkWinners();
-            updateHistory(selected, [x, y], takenPiece);
+            setTimeout(function(){ // there has to be a timeout here because the bot would otherwise make a move that wouldnt be checked for a win or loss
+                checkWinners();
+                updateHistory(selected, [x, y], takenPiece);
+            }, 100);
         }
     }
     let nP = currentPlayer == "white" ? 1 : 2;
