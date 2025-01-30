@@ -1075,16 +1075,10 @@ function changePlayersColour(){ // function for changing the colour of the playe
         //console.log("this ran");
         //console.log("bot is " + whosBot);
         //return;
+        //console.log(whosBot);
         enemyDecision();
         //console.log(currentPlayer);
-        currentPlayer = currentPlayer == "white" ? "black" : "white";
-        document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-        if (checkWin(gameGrid, whosBot == 1 ? "black" : "white", true, true) == "win"){
-            let player = currentPlayer == "white" ? "black" : "white";
-            document.getElementById("currentPlayerText").textContent = "Player " + player + " wins!";
-        }else if (checkWin(gameGrid, whosBot == 1 ? "black" : "white", true, true) == "draw"){
-            document.getElementById("currentPlayerText").textContent = "Draw!";
-        }
+        checkWinners();
     }
 }
 
@@ -1148,7 +1142,7 @@ function evaluateNodeLine(node){ // this function evaluates the value of the nod
                     value = node.parent.children[i].value;
                 }
             }
-            console.log("minimazing");
+            //console.log("minimazing");
         }
         if (node.parent.player == "black"){
             for (let i = 0; i < node.parent.children.length; i++){
@@ -1156,7 +1150,7 @@ function evaluateNodeLine(node){ // this function evaluates the value of the nod
                     value = node.parent.children[i].value;
                 }
             }
-            console.log("maximizing");
+            //console.log("maximizing");
         }
         node = node.parent;
     }
@@ -1167,7 +1161,7 @@ function findBestMove(nodes){ // this function finds the best move for the bot f
     let bestMove = [];
     let bestNodesNumber = 0;
     let bestValue = -100000000
-    console.log(nodes);
+    //console.log(nodes);
     for (let i = 0; i < nodes.length; i++){
         //console.log(nodes[i]);
         for (let j =0; j < nodes[i][1].length; j++){
@@ -1186,8 +1180,8 @@ function findBestMove(nodes){ // this function finds the best move for the bot f
             bestMove = [scores[x][0], scores[x][1], scores[x][3], scores[x][4]];
         }
     }
-    console.log(bestMove);
-    console.log("with a score of " +bestValue);
+    //console.log(bestMove);
+    //console.log("with a score of " +bestValue);
     return bestMove;
 }
 
@@ -1245,6 +1239,7 @@ function recursiveFunc(grid, player, depth, desiredDepth , NODE){ // this is a r
     let originalPlayer = player;
     player = player == "white" ? "black" : "white";
     let nP = player == "white" ? 1 : 2;
+    //console.log(player);
     let allMoveOptions = [];
     for (let i = 0; i < 8; i++){ // getting all the possible moves of the player
         for (let j = 0; j < 8; j++){
@@ -1283,24 +1278,25 @@ function recursiveFunc(grid, player, depth, desiredDepth , NODE){ // this is a r
             //console.log(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true));
             //console.log("-------------------------");
             if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
-                console.log("win at depth: " + depth + " black won");
+                //console.log("win at depth: " + depth + " won");
+                //console.log("/////////////////////////////////////");
                 if (winningDepth == null || winningDepth > depth){
                     winningDepth = depth;
                 }
                 endingMove = true;
                 value = parseInt(parseFloat(value + 10000000)*100)/100;
-            }else if(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "draw"){
+            }else if(checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw" || checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "draw"){
                 endingMove = true;
                 value = parseInt(parseFloat(value - 10000000)*100)/100;
-                console.log("draw at depth: " + depth);
+                /*console.log("draw at depth: " + depth);
                 console.log(gameGrid);
                 console.log(currentPlayer);
-                console.log(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true));
+                console.log(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true));*/
             }
             NODE.addChild(new Node(player, depth, NODE, value));
             if (depth < desiredDepth && !endingMove && depth < winningDepth){
                 //console.log("depth: " + depth, "desiredDepth: " + desiredDepth);
-                recursiveFunc(grid, player == "white" ? "black" : "white", depth, desiredDepth, NODE.children[NODE.children.length - 1]);
+                recursiveFunc(grid, player, depth, desiredDepth, NODE.children[NODE.children.length - 1]);
             }
             grid[newY].splice(newX, 0);
             grid[newY].splice(newX, 1, tInPlace);
@@ -1441,13 +1437,13 @@ function ideaFunc(nodes, desiredDepth, changedNodes, desiredDepth){ // i have an
             }
         }
     }
-    console.log("hopefully results");
-    console.log(nodes);
+    //console.log("hopefully results");
+    //console.log(nodes);
     let bestMove = [];
     let bestValue = -100000000;
     let bestIndex = 0;
     for (let i = 0; i < nodes.length; i++){
-        console.log(nodes[i][1].value);
+        //console.log(nodes[i][1].value);
         //console.log(nodes[i][1].depth);
         //console.log("-----------------------------");
         if (nodes[i][1].value > bestValue){
@@ -1460,8 +1456,8 @@ function ideaFunc(nodes, desiredDepth, changedNodes, desiredDepth){ // i have an
             bestMove = [scores[i][0], scores[i][1], scores[i][3], scores[i][4]];
         }
     }
-    console.log(bestValue);
-    console.log(bestMove);
+    //console.log(bestValue);
+    //console.log(bestMove);
     return bestMove;
 }
 
@@ -1512,18 +1508,21 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
                 winningDepth = 0;
                 endingMove = true;
                 value = parseInt(parseFloat(value + 10000000) * 100) / 100;
-                console.log("winning move at decision");
+                //console.log("winning move at decision");
             }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
                 endingMove = true;
                 value = parseInt(parseFloat(value - 10000000) * 100) / 100;
-                console.log("draw at decision");
+                //console.log("draw at decision");
             }
-            console.log(currentPlayer);
+            //console.log(currentPlayer);
             let n = new Node(currentPlayer, 1, null, value);
             nodes.push([i, n]);
             if (!endingMove && 1 < desiredDepth && 1 < winningDepth){ // if the move isnt a move that would cause a loss or a win imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
                 //console.log("recursion");
+                //console.log(currentPlayer);
+                //console.log(gameGrid);
                 recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth,n);
+                //return;
             }
             // reseting the grid to its original state, so that the next move can be tested on the original board
             gameGrid[scores[i][4]].splice(scores[i][3], 0);
@@ -1542,22 +1541,16 @@ function enemyDecision(){ // this is the main function of the bot, it is called 
         console.log("//////////");*/
         //return;
         let changedNodes = resNodes();
-        console.log(changedNodes);
-        console.log("////////////////////");
+        //console.log(changedNodes);
+        //console.log("////////////////////");
         bestMove = ideaFunc(nodes, desiredDepth, changedNodes[0], desiredDepth);
         //bestMove = findBestMove(restructuredNodes); // finding the best move from the restructuredNodes array, the one with the highest score is always selected
         //return;
         makeMove(bestMove); // making the move through a function since there is no simpler way to do it as far as I know
         // this is the part of the code that checks if an end result happened
-    }else{
-        if (checkWin(gameGrid, "white", false, true) == "win"){
-            document.getElementById("currentPlayerText").textContent = "Player black wins!";
-        }else if (checkWin(gameGrid, "black", false, true) == "win"){
-            document.getElementById("currentPlayerText").textContent = "Player white wins!";
-        }
-        return true;
     }
-    return false;
+    currentPlayer = currentPlayer == "white" ? "black" : "white";
+    document.getElementById("currentPlayerText").innerHTML = "Current Player: " + currentPlayer;
 }
 
 function resizeCanvasFunc(){ // function for resizing the working canvas, it is needed to make the game completely responsive
@@ -1724,29 +1717,29 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
     kingMoves.push([king.x, king.y]);
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null && gameGrid[i][j].player != nP){ // this part of the code is used to get all the moves of the enemy pieces and the piece that is currently checking the king
+            if (grid[i][j] != null && grid[i][j].player != nP){ // this part of the code is used to get all the moves of the enemy pieces and the piece that is currently checking the king
                 let currentAddedMoves = [];
-                currentAddedMoves.push(gameGrid[i][j].GetMoves(false));
-                if (gameGrid[i][j].type == "Pawn"){
-                    if (gameGrid[i][j].player == 1){
-                        currentAddedMoves[0].push([gameGrid[i][j].x, gameGrid[i][j].y + 1]);
+                currentAddedMoves.push(grid[i][j].GetMoves(false));
+                if (grid[i][j].type == "Pawn"){
+                    if (grid[i][j].player == 1){
+                        currentAddedMoves[0].push([grid[i][j].x, grid[i][j].y + 1]);
                     }else{
-                        currentAddedMoves[0].push([gameGrid[i][j].x, gameGrid[i][j].y - 1]);
+                        currentAddedMoves[0].push([grid[i][j].x, grid[i][j].y - 1]);
                     }
                 }
                 for (let k = 0; k < currentAddedMoves.length; k++){
                     for (let l = 0; l < currentAddedMoves[k].length; l++){
                         for (let m = 0; m < kingMoves.length; m++){
                             if (currentAddedMoves[k][l][0] == king.x && currentAddedMoves[k][l][1] == king.y){
-                                checkingPiece = gameGrid[i][j];
+                                checkingPiece = grid[i][j];
                             }
                         }
                     }
                 }
                 moves.push(currentAddedMoves);
             }
-            if (gameGrid[i][j] != null && gameGrid[i][j].player == nP && gameGrid[i][j].type != "King"){
-                if (gameGrid[i][j].GetMoves(true).length != 0){
+            if (grid[i][j] != null && grid[i][j].player == nP && grid[i][j].type != "King"){
+                if (grid[i][j].GetMoves(true).length != 0){
                     numOfAlliedPieces++;
                 }
             }
@@ -1766,33 +1759,40 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
     if (kingMoves.length == 0 || kingMoves.length == 1 && numOfAlliedPieces == 0){
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
-                if (gameGrid[i][j] != null && gameGrid[i][j].player == nP){ // this part of the code checks if the player can move somewhere with any piece, if not then its either a draw or a win
-                    let moves = gameGrid[i][j].GetMoves(true);
+                if (grid[i][j] != null && grid[i][j].player == nP){ // this part of the code checks if the player can move somewhere with any piece, if not then its either a draw or a win
+                    let moves = grid[i][j].GetMoves(true);
                     for (let k = 0; k < moves.length; k++){
                         if (t){
-                            let tempPiece = gameGrid[i][j];
-                            let movingPiece = gameGrid[moves[k][1]][moves[k][0]];
-                            gameGrid[moves[k][1]].splice(moves[k][0], 0);
-                            gameGrid[moves[k][1]].splice(moves[k][0], 1, gameGrid[i][j]);
-                            gameGrid[i].splice(j, 0);
-                            gameGrid[i].splice(j, 1, null);
-                            if (!checkCheck(gameGrid, nP)){
-                                gameGrid[tempPiece.y].splice(tempPiece.x, 0);
-                                gameGrid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
-                                gameGrid[moves[k][1]].splice(moves[k][0], 0);
-                                gameGrid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
-                                if(c){ // the c is used to prevent a bug that was caused by the bot exploring the possible moves
-                                    //console.log("this ran");
-                                    highlightTiles(checkingPiece);
-                                }
+                            //console.log("here is something happening");
+                            let tempPiece = grid[i][j];
+                            let pieceInPlace = grid[moves[k][1]][moves[k][0]];
+                            let ans = false;
+                            if (pieceInPlace != null){
                                 return "no winner";
                             }
-                            gameGrid[tempPiece.y].splice(tempPiece.x, 0);
-                            gameGrid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
-                            gameGrid[i].splice(j, 0);
-                            gameGrid[i].splice(j, 1, gameGrid[moves[k][1]][moves[k][0]]);
-                            gameGrid[moves[k][1]].splice(moves[k][0], 0);
-                            gameGrid[moves[k][1]].splice(moves[k][0], 1, null);
+                            // moving to new place
+                            grid[moves[k][1]].splice(moves[k][0], 0);
+                            grid[moves[k][1]].splice(moves[k][0], 1, tempPiece);
+                            // setting new x and y
+                            grid[moves[k][1]][moves[k][0]].x = moves[k][0];
+                            grid[moves[k][1]][moves[k][0]].y = moves[k][1];
+                            // removing from old place
+                            grid[i].splice(j, 0);
+                            grid[i].splice(j, 1, null);
+                            if (!checkCheck(grid, nP)){
+                                ans = true;
+                            }
+                            // moving piece back to its original place
+                            grid[moves[k][1]].splice(moves[k][0], 0);
+                            grid[moves[k][1]].splice(moves[k][0], 1, pieceInPlace);
+                            grid[i].splice(j, 0);
+                            grid[i].splice(j, 1, tempPiece);
+                            // setting x and y back to original
+                            grid[i][j].x = j;
+                            grid[i][j].y = i;
+                            if(ans){
+                                return "no winner";
+                            }
                         }
                     }
                 }
@@ -1808,10 +1808,34 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
         }
     }
     if(checkingPiece != null && c){ // this is used to make the yellow and red tile highlighting in the game
+        //console.log("this ran");
+        //something = elsed; // this was a test, I needed to cause an error
         highlightTiles(checkingPiece);
     }
     return "no winner";
 }
+ // this is some old code that caused issues with pieces disapearing
+                            /*grid[moves[k][1]].splice(moves[k][0], 0);
+                            grid[moves[k][1]].splice(moves[k][0], 1, grid[i][j]);
+                            grid[i].splice(j, 0);
+                            grid[i].splice(j, 1, null);
+                            console.log("something is happening here");
+                            if (!checkCheck(grid, nP)){
+                                grid[tempPiece.y].splice(tempPiece.x, 0);
+                                grid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
+                                grid[moves[k][1]].splice(moves[k][0], 0);
+                                grid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
+                                if(c){ // the c is used to prevent a bug that was caused by the bot exploring the possible moves
+                                    highlightTiles(checkingPiece);
+                                }
+                                return "no winner";
+                            }
+                            grid[tempPiece.y].splice(tempPiece.x, 0);
+                            grid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
+                            grid[i].splice(j, 0);
+                            grid[i].splice(j, 1, grid[moves[k][1]][moves[k][0]]);
+                            grid[moves[k][1]].splice(moves[k][0], 0);
+                            grid[moves[k][1]].splice(moves[k][0], 1, null);*/
 
 function updateHistory(oldPos, newPos, takenPiece){ // this function is used to update the move history, it is called after every move, and its used for the undo and redo functions
     if (historyOffset > 0){
@@ -1955,6 +1979,26 @@ function drawNumbersLetters(){ // this function is used to draw the numbers and 
     }
 }
 
+function checkWinners(){ // this function is used to check if the game is over
+    let enemyPlayer = currentPlayer == "white" ? "black" : "white";
+    if (checkWin(gameGrid, currentPlayer, true, true) == "win"){
+        document.getElementById("currentPlayerText").textContent = "Player " + enemyPlayer + " wins!";
+        setTimeout(function(){
+            alert("Player " + enemyPlayer + " wins!");
+        }, 100);
+    }else if (checkWin(gameGrid, enemyPlayer, true, true) == "win"){
+        document.getElementById("currentPlayerText").textContent = "Player " + currentPlayer + " wins!";
+        setTimeout(function(){
+            alert("Player " + currentPlayer + " wins!");
+        }, 100);
+    } else if (checkWin(gameGrid, currentPlayer, true, true) == "draw" || checkWin(gameGrid, enemyPlayer, true, true) == "draw"){
+        document.getElementById("currentPlayerText").textContent = "Draw!";
+        setTimeout(function(){
+            alert("Draw!");
+        }, 100);
+    }
+}
+
 function mousePressed() { // this function is called when the mouse is pressed, it is used to for selecting and moving pieces
     let x = Math.floor(mouseX / baseSize); // this gets the tile that the player clicked on
     let y = Math.floor(mouseY / baseSize);
@@ -2030,7 +2074,6 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             highlightedTiles = [];
             checkedKing = [];
             currentPlayer = currentPlayer == "white" ? "black": "white";
-            enemyPlayer = currentPlayer == "white" ? "black" : "white";
             document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
             if (numberOfPieces(gameGrid, "white")){
                 faze[0] = "late";
@@ -2038,38 +2081,16 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             if(numberOfPieces(gameGrid, "black")){
                 faze[1] = "late";
             }
-            if (checkWin(gameGrid, currentPlayer, true, true) == "win"){
-                document.getElementById("currentPlayerText").textContent = "Player " + enemyPlayer + " wins!";
-                setTimeout(function(){
-                    alert("Player " + enemyPlayer + " wins!");
-                }, 100);
-            } else if (checkWin(gameGrid, currentPlayer, true, true) == "draw"){
-                document.getElementById("currentPlayerText").textContent = "Draw!";
-                setTimeout(function(){
-                    alert("Draw!");
-                }, 100);
-            }
-            updateHistory(selected, [x, y], takenPiece);
             if (enemy == "bot"){
-                let t = enemyDecision();
+                //console.log(highlightedTiles);
+                enemyDecision();
                 //console.log(t);
-                if (!t){
-                    console.log("here");
-                    currentPlayer = currentPlayer == "white" ? "black": "white";
-                    document.getElementById("currentPlayerText").textContent = "Current Player: " + currentPlayer;
-                    if (checkWin(gameGrid, currentPlayer, true, true) == "win"){
-                        document.getElementById("currentPlayerText").textContent = "Player " + currentPlayer + " wins!";
-                        setTimeout(function(){
-                            alert("Player " + currentPlayer + " wins!");
-                        }, 100);
-                    }else if (checkWin(gameGrid, currentPlayer, true, true) == "draw"){
-                        document.getElementById("currentPlayerText").textContent = "Draw!";
-                        setTimeout(function(){
-                            alert("Draw!");
-                        }, 100);
-                    }
-                }
+                //console.log("here");
             }
+            //console.log(currentPlayer);
+            enemyPlayer = currentPlayer == "white" ? "black" : "white";
+            checkWinners();
+            updateHistory(selected, [x, y], takenPiece);
         }
     }
     let nP = currentPlayer == "white" ? 1 : 2;
