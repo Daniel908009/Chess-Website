@@ -1,29 +1,42 @@
 # Chess Website
 
 ## What is it?
-This project is a chess game on a web page written in Javascript with a fully working PvP mode and Player vs Bot mode made using Bootstrap and p5js libraries. I reccomend reading the Bot explanation section of this README.md file to understand where most of the complexity of this project is.
+This project is a chess game on a web page written in JavaScript, featuring a fully working PvP mode and a Player vs. Bot mode. It is built using Bootstrap and the p5.js library. I recommend reading the "Bot Explanation" section of this README file to understand where most of the complexity of this project lies.
 
 ## Why did I do it?
-I never really liked web development, but it is essential for programmer to know how to make websites, for example some day I will have to make my own portfolio website and it would be much easier if I already have experience with HTML, CSS and JS. I also wanted to make some decision making algorithm, since I am fascinated by those. So I had narrowed it down to these options: Tic Tac Toe, Chess, Checkers. Since I felt like doing a more complicated and bigger project I chose the chess. I picked Bootstrap since I have some experience with it and p5js since I wanted to know how it works, because I could use it for a bunch of other projects and I heard its a good framework.
+I never really liked web development, but it is essential for a programmer to know how to make websites. For example, someday I will have to create my own portfolio website, and it would be much easier if I already have experience with HTML, CSS, and JavaScript. I also wanted to create a decision-making algorithm since I am fascinated by them. So, I narrowed my options down to Tic-Tac-Toe, Chess, and Checkers. Since I wanted a more complex and challenging project, I chose chess.
+
+I picked Bootstrap because I have some experience with it and p5.js because I wanted to learn how it works. I heard it’s a good framework that I could use for many other projects.
 
 ## Features
 - [X] Enemy Bot
-- [X] Fully working checkmating
-- [X] Limiting movement of pieces (basically removing the moves that would put their own king in check)
+- [X] Fully working checkmating logic
+- [X] Limiting movement of pieces (removing moves that would put their own king in check)
 - [X] Highlighting pieces that can move if the king is in check (blocking, etc.)
 - [X] Resizable front end, works even on phones!
 - [X] Saving games to local storage
 - [X] Exporting and Importing games using a JSON files
-- [X] Undo and Redo buttons for PvP mode (they are not in PvB because currently the player could just make the move for the bot using undo, I am working on making a new way of storing the history of moves, so that it could work in PvB)
-- [X] Checkmating logic, this is the second most overhauled part of the code, right after the bot decision making function
+- [X] Undo and Redo buttons for PvP mode (not available in PvB because currently, the player could just undo the bot’s move. I am working on a new way to store move history so that undo can work in PvB as well.)
+- [X] Checkmating logic – this is the second most overhauled part of the code, right after the bot’s decision-making function.
 
 ## Bot explanation
-I started to work on the bot when the first playable version of the game existed. While making the bot I suffered from the endless hell of recursive functions, seriously though, they are absolutely painfull to debug. Over the course of making this site I did 4 complete overhauls of the way the bot worked, this is because I have only tried making this kind of algorithm once before and it didnt even work that time. I wont explain all the details of each overhaul, but you can see them all in the commits. I made sure to save each one in case someone wants to check it out. But in short. All bots except of the last one suffered from problems with detecting a good move at a deeper level of recursion than 1, for a playable bot you need at least 3. With the final overhaul I used everything I learned from the first 3 and combined it with my new strategy of using nodes (this is a class I made, for more info look at the code). This strategy turned out to be right, the nodes worked perfectly to represent each possible move, currently the bot can see 3 moves ahead (this is limited because web pages only use one thread, so if I for example set it to 7, it would crash the browser, this is because at level 7 there is around 1 280 000 000 possible moves) and uses functions for detecting checking, evaluating the board, score tables(these bassicaly determine where each pieces optimal possition is), etc. 
+I started working on the bot when the first playable version of the game was completed. While making the bot, I suffered through the endless hell of recursive functions—seriously, they are absolutely painful to debug.
 
-I think its already the biggest and most complicated thing I have ever done as of writting this README, but there is room for improvements. First is the depth of the search. Currently its 3 with a possibility of 4, however I think I could get it up to 6 if I implement some extra computing power saving logic. Secondly the bot freezes the entire page when its deciding the next move. I have an idea how to fix it, but I am not surre if its possible, so I cant make any promisses yet.
+Over the course of development, I did four complete overhauls of the bot’s logic. This is because I had only tried making this kind of algorithm once before, and it didn’t even work that time. I won’t explain every detail of each overhaul, but you can see them all in the commit history. I made sure to save each version in case someone wants to check them out.
+
+In short, all previous versions of the bot struggled with detecting a good move beyond a recursion depth of one—but for a playable bot, you need at least three. With the final overhaul, I used everything I had learned from the first three attempts and combined it with a new strategy using nodes (this is a class I made—check the code for more details). This approach turned out to be the right one. The nodes worked perfectly to represent each possible move.
+
+Currently, the bot can see three moves ahead (limited due to JavaScript running on a single thread—setting it to seven would crash the browser because at that depth there are around 1,280,000,000 possible moves). The bot uses functions for detecting check, evaluating the board, score tables (which determine the optimal position for each piece), and more.
+
+At the time of writing this README, this is the biggest and most complex thing I have ever built, but there is still room for improvement:
+
+1. Increasing search depth – Right now, the depth is three, with a possibility of four, but I believe I could push it to six by implementing extra optimization techniques.
+2. Preventing the page from freezing – The bot currently freezes the entire page while thinking. I have an idea to fix this, but I’m not sure if it’s possible, so I can’t make any promises yet.
 
 ## Features of the future
-Apart from the bot improvements I could make. The site has what I would call a "working UI". It isnt that good or engaging, so that needs some improvements. I also want to add a dark mode, since if you open the web page at 3 A.M. you will go blind, source: my eyes. Also there is a known issue with clicking the undo button after the player has done castling, this will be fixed soon.
+Beyond improving the bot, the site has what I would call a "working UI"—it functions but isn’t particularly polished or engaging, so that needs improvement. I also want to add dark mode because opening the page at 3 A.M. will burn your eyes (source: my eyes).
+
+There is also a known issue with the undo button after castling, which I will fix soon.
 
 ## Screenshots
-### Each screenshot has a description under it, just so you know what you are seeing
+### Each screenshot has a description below it so you can understand what you are seeing.
