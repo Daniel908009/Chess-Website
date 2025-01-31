@@ -10,6 +10,9 @@ I never really liked web development, but it is essential for a programmer to kn
 
 I picked Bootstrap because I have some experience with it and p5.js because I wanted to learn how it works. I heard it’s a good framework that I could use for many other projects.
 
+## How to play
+The game is self explanatory, however when playing against the bot the window can freeze for a couple of seconds, this is because web pages can only use one thread and the decision making algorithm can be resource intensive when many pieces are still on the board, for more info about this read the "Bot Explanation" section of this README file.
+
 ## Features
 - [X] Enemy Bot capable of thinking ahead
 - [X] Fully working checkmating logic
@@ -21,7 +24,7 @@ I picked Bootstrap because I have some experience with it and p5.js because I wa
 - [X] Undo and Redo buttons for PvP mode (not available in PvB because currently, the player could just undo the bot’s move. I am working on a new way to store move history so that undo can work in PvB as well.)
 - [X] Checkmating logic – this is the second most overhauled part of the code, right after the bot’s decision-making function.
 
-## Bot explanation
+## Bot Explanation
 I started working on the bot when the first playable version of the game was completed. While making the bot, I suffered through the endless hell of recursive functions—seriously, they are absolutely painful to debug.
 
 Over the course of development, I did four complete overhauls of the bot’s logic. This is because I had only tried making this kind of algorithm once before, and it didn’t even work that time. I won’t explain every detail of each overhaul, but you can see them all in the commit history. I made sure to save each version in case someone wants to check them out.
@@ -67,3 +70,7 @@ This is how the board looks when the player is in check (the game highlights the
 ![image](https://github.com/user-attachments/assets/4b123cab-0e40-4719-85c9-2b6d5f49162a)
 
 When someone wins the current player text will change and a popup will appear.
+
+## How to download and run locally
+In case you want to download this web page. I would reccomend picking the latest release in this repository (releases can be seen on the right side of this repository when openning, they are usually named something like v1.0). Then simply click on what you want to download, in most cases this would be the Source code (zip). Then you should Extract the files to where you want them to be. After that you can open the page locally using technologies like VSCode with the live server extension.
+ 
