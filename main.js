@@ -146,16 +146,7 @@ class Rook extends Piece {
                 }
             }
         }
-        if (this.numMoves == 0){
-            if (gameGrid[this.y][this.x -1] == null && gameGrid[this.y][this.x -2] == null && gameGrid[this.y][this.x -3] == null && gameGrid[this.y][this.x -4] != null && gameGrid[this.y][this.x -4].type == "Rook" && gameGrid[this.y][this.x -4].numMoves == 0){
-                moves.push([this.x -2, this.y]);
-                specialMoves.push([this.x -2, this.y]);
-            }
-            if (gameGrid[this.y][this.x +1] == null && gameGrid[this.y][this.x +2] == null && gameGrid[this.y][this.x +3] != null && gameGrid[this.y][this.x +3].type == "Rook" && gameGrid[this.y][this.x +3].numMoves == 0){
-                moves.push([this.x +2, this.y]);
-                specialMoves.push([this.x +2, this.y]);
-            }
-        }
+        
         if(c){
             moves = removeLostMoves(moves, this.player, this);
         }
@@ -439,7 +430,7 @@ class King extends Piece {
             }else if (gameGrid[this.y][this.x -1].player != this.player){
                 moves.push([this.x -1, this.y]);
             }}
-        if (this.numMoves == 0){
+        if (this.numMoves == 0 && this.player != whosBot){
             if (gameGrid[this.y][this.x +1] == null && gameGrid[this.y][this.x +2] == null && gameGrid[this.y][this.x +3] != null && gameGrid[this.y][this.x +3].type == "Rook" && gameGrid[this.y][this.x +3].numMoves == 0){
                 moves.push([this.x +2, this.y]);
                 specialMoves.push([this.x +2, this.y]);
@@ -2059,24 +2050,15 @@ function mousePressed() { // this function is called when the mouse is pressed, 
                     }
                     if (specialMoves[j][0] == x && specialMoves[j][1] == y && gameGrid[y][x].type == "King"){
                         if (x == 6){
-                            gameGrid[y][5] = gameGrid[y][7];
-                            gameGrid[y][5].x = 5;
-                            gameGrid[y][7] = null;
+                            gameGrid[y][5] = new Rook(5, y, gameGrid[y][x].player);
+                            gameGrid[y][5].numMoves = 1;
+                            gameGrid[y].splice(7, 1);
+                            gameGrid[y].splice(7, 0, null);
                         }else{
-                            gameGrid[y][3] = gameGrid[y][0];
-                            gameGrid[y][3].x = 3;
-                            gameGrid[y][0] = null;
-                        }
-                    }
-                    if (specialMoves[j][0] == x && specialMoves[j][1] == y && gameGrid[y][x].type == "Rook"){
-                        if (x == 2){
-                            gameGrid[y][3] = gameGrid[y][0];
-                            gameGrid[y][3].x = 3;
-                            gameGrid[y][0] = null;
-                        }else{
-                            gameGrid[y][5] = gameGrid[y][7];
-                            gameGrid[y][5].x = 5;
-                            gameGrid[y][7] = null;
+                            gameGrid[y][3] = new Rook(3, y, gameGrid[y][x].player);
+                            gameGrid[y][3].numMoves = 1;
+                            gameGrid[y].splice(0, 1);
+                            gameGrid[y].splice(0, 0, null);
                         }
                     }
                 }
