@@ -1,7 +1,7 @@
 # Chess Website
 
 ## What is it?
-This project is a chess game on a web page written in JavaScript, featuring a fully working PvP mode and a Player vs. Bot mode. It is built using Bootstrap and the p5.js library. I recommend reading the "Bot Explanation" section of this README file to understand where most of the complexity of this project lies.
+This project is a chess game on a web page written in JavaScript, featuring a fully working PvP mode and a Player vs. Bot mode. It is built using Bootstrap and the p5.js library. I recommend reading the "Bot Explanation" section of this README file to understand where most of the complexity of this project lies. Also if you do not have the time to play an entire game, there is a scenarios menu on the right side of the screen. It contains some presets I used for testing the bot.
 
 Live deployment: https://daniel908009.github.io/Chess-Website/
 
@@ -11,7 +11,7 @@ I never really liked web development, but it is essential for a programmer to kn
 I picked Bootstrap because I have some experience with it and p5.js because I wanted to learn how it works. I heard it’s a good framework that I could use for many other projects.
 
 ## Features
-- [X] Enemy Bot
+- [X] Enemy Bot capable of thinking ahead
 - [X] Fully working checkmating logic
 - [X] Limiting movement of pieces (removing moves that would put their own king in check)
 - [X] Highlighting pieces that can move if the king is in check (blocking, etc.)
