@@ -2,6 +2,7 @@
 
 ## What is it?
 This project is a chess game on a web page written in JavaScript, featuring a fully working PvP mode and a Player vs. Bot mode. It is built using Bootstrap and the p5.js library. I recommend reading the "Bot Explanation" section of this README file to understand where most of the complexity of this project lies.
+Live deployment: https://daniel908009.github.io/Chess-Website/
 
 ## Why did I do it?
 I never really liked web development, but it is essential for a programmer to know how to make websites. For example, someday I will have to create my own portfolio website, and it would be much easier if I already have experience with HTML, CSS, and JavaScript. I also wanted to create a decision-making algorithm since I am fascinated by them. So, I narrowed my options down to Tic-Tac-Toe, Chess, and Checkers. Since I wanted a more complex and challenging project, I chose chess.
@@ -40,3 +41,18 @@ There is also a known issue with the undo button after castling, which I will fi
 
 ## Screenshots
 ### Each screenshot has a description below it so you can understand what you are seeing.
+![image](https://github.com/user-attachments/assets/647109a2-e823-4861-add8-33ac69ec0d9e)
+This is how the website looks when opened.
+![image](https://github.com/user-attachments/assets/d5e94600-9d6a-4ebe-b64e-a1bd52288519)
+This is the menu with all the options, this menu changes dynamicaly based on if the enemy is a bot or a player.
+Most of the menu is pretty self explanatory, but just in case. 
+The scenarios spinner shows a selection of games saved by the player and some presets that were used in the making of this projects bot.
+Export button will download the current game as a JSON file.
+Save to browser button will save the game to local storage (basically it will be saved to the browser it self)
+Delete all games button will delete all games from local storage, this will not affect the base game scenarios.
+![image](https://github.com/user-attachments/assets/b3f7eb72-7ed4-462f-a8f1-56ba603c83f3)
+This is the part of the menu that only appears if the enemy is a bot
+![image](https://github.com/user-attachments/assets/cb2b6fc2-c067-4fb5-825e-63d895f3710c)
+This is how the board looks when the player is in check (the game highlights the pieces that can move and the king)
+![image](https://github.com/user-attachments/assets/4b123cab-0e40-4719-85c9-2b6d5f49162a)
+When someone wins the current player text will change and a popup will appear.
