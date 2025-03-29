@@ -1904,12 +1904,20 @@ function makeOptions(){ // this function is used to fill the select spinner with
     }
 }
 
+function copyTime(){ // this is updating the copy time of the site
+    let text = document.getElementById("bottomText");
+    let date = new Date();
+    let year = date.getFullYear();
+    text.textContent = '© 2024-'+year+' Daniel Kriz';
+}
+
 function setup() { // simple setup function that creates the canvas and calls the resetGame function to fill in the new game grid
     width = windowWidth * 0.8;
     height = windowHeight * 0.8;
     size = width > height ? height : width;
     canvas = createCanvas(size, size);
     baseSize = height / 8;
+    copyTime();
     canvas.parent('chessboard');
     loadingLayouts();
     makeOptions();
