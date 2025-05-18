@@ -724,9 +724,10 @@ let whosBot = 1; // this is used to determine which player is the bot
 let currentPlayer = "white"; // this is used to determine which player is playing
 let faze = ["early", "early"]; // this is used to determine the faze of the game, it is used to determine which table to use for the evaluation of the pieces
 // currently doesnt do anything, but it is here for future use
+let specialMoves = [];
 onmessage = function (data) {
     console.log(data)
-    
+    specialMoves = [];
     /*for (let i = 0; i < gameGrid.length; i++){
         cpGrid.push([]);
         for (let j = 0; j < gameGrid[i].length; j++){
