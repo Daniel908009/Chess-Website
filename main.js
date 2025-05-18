@@ -1,3 +1,5 @@
+const algorithmWorker = new Worker('algorithm.js'); // this is so that the browser wont crash when calculating a bot move
+
 class Piece { // parent class of all pieces
     constructor(x, y, player) {
         this.x = x;
@@ -20,7 +22,7 @@ class Pawn extends Piece {
             this.image = loadImage('images/black_pawn.png');
         }
     }
-    GetMoves(c) { // all classes have this function, it returns all possible moves for the piece
+    GetMoves(c,gameGrid) { // all classes have this function, it returns all possible moves for the piece
         let moves = [];
         if (this.player == 2) {
             if (this.y + 1 < 8 && gameGrid[this.y + 1][this.x] == null) {
@@ -73,17 +75,7 @@ class Pawn extends Piece {
     }
 }
 
-const pawnTableBlack = [ // this is a table used for the evaluation of positions of pieces on the board, it is used by the decision making algorithm
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [5, 10, 10, -20, -20, 10, 10, 5],
-    [5, -5, -10, 0, 0, -10, -5, 5],
-    [0, 0, 0, 20, 20, 0, 0, 0],
-    [5, 5, 10, 25, 25, 10, 5, 5],
-    [10, 10, 20, 30, 30, 20, 10, 10],
-    [50, 50, 50, 50, 50, 50, 50, 50],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-];
-const pawnTableWhite = pawnTableBlack.slice().reverse();
+
 
 class Rook extends Piece {
     constructor(x, y, player) {
@@ -96,7 +88,7 @@ class Rook extends Piece {
             this.image = loadImage('images/black_rook.png');
         }
     }
-    GetMoves(c) {
+    GetMoves(c,gameGrid) {
         let moves = [];
         for (let i = 1; i < 8; i++) {
             if (this.x + i < 8) {
@@ -154,29 +146,7 @@ class Rook extends Piece {
     }
 }
 
-const rookTableBlack = [
-    [0, 0, 0, 5, 5, 0, 0, 0],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [5, 10, 10, 10, 10, 10, 10, 5],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-];
-/*
-const rookTableBlack = [ // this is  for testing purposes
-    [0, 0, 0, 5, 5, 0, 0, 0],
-    [-5, -5, -5, -5, -5, -5, -5, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [5, 10, 10, 10, 10, 10, 10, 5],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-];*/
 
-const rookTableWhite = rookTableBlack.slice().reverse();
 
 class Bishop extends Piece {
     constructor(x, y, player) {
@@ -190,7 +160,7 @@ class Bishop extends Piece {
         }
     }
 
-    GetMoves(c) {
+    GetMoves(c, gameGrid) {
         let moves = [];
         let temp = true;
         let i = 1;
@@ -268,18 +238,7 @@ class Bishop extends Piece {
 
 }
 
-const bishopTableBlack = [
-    [-20, -10, -10, -10, -10, -10, -10, -20],
-    [-10, 0, 0, 0, 0, 0, 0, -10],
-    [-10, 0, 5, 10, 10, 5, 0, -10],
-    [-10, 5, 5, 10, 10, 5, 5, -10],
-    [-10, 0, 10, 10, 10, 10, 0, -10],
-    [-10, 10, 10, 10, 10, 10, 10, -10],
-    [-10, 5, 0, 0, 0, 0, 5, -10],
-    [-20, -10, -10, -10, -10, -10, -10, -20]
-];
 
-const bishopTableWhite = bishopTableBlack.slice().reverse();
 
 class Knight extends Piece {
     constructor(x, y, player){
@@ -293,7 +252,7 @@ class Knight extends Piece {
             this.image = loadImage('images/black_horse.png');
         }
     }
-    GetMoves(c){
+    GetMoves(c, gameGrid){
         let moves = [];
         if (this.x + 2 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +2] == null){
@@ -353,18 +312,7 @@ class Knight extends Piece {
     }
 }
 
-const knightTableBlack = [
-    [-50, -40, -30, -30, -30, -30, -40, -50],
-    [-40, -20, 0, 0, 0, 0, -20, -40],
-    [-30, 0, 10, 15, 15, 10, 0, -30],
-    [-30, 5, 15, 20, 20, 15, 5, -30],
-    [-30, 0, 15, 20, 20, 15, 0, -30],
-    [-30, 5, 10, 15, 15, 10, 5, -30],
-    [-40, -20, 0, 5, 5, 0, -20, -40],
-    [-50, -40, -30, -30, -30, -30, -40, -50]
-];
 
-const knightTableWhite = knightTableBlack.slice().reverse();
 
 class King extends Piece {
     constructor(x, y, player){
@@ -377,7 +325,7 @@ class King extends Piece {
             this.image = loadImage('images/black_king.png');
         }
     }
-    GetMoves(c){
+    GetMoves(c, gameGrid){
         let moves = [];
         if (this.x + 1 < 8 && this.y + 1 < 8){
             if (gameGrid[this.y +1][this.x +1] == null){
@@ -447,7 +395,7 @@ class King extends Piece {
                 for (let j = 0; j < 8; j++){
                     if (gameGrid[i][j] != null && gameGrid[i][j].player != this.player){
                         if(gameGrid[i][j].type != "Pawn"){
-                            removeMoves.push(gameGrid[i][j].GetMoves(false));
+                            removeMoves.push(gameGrid[i][j].GetMoves(false, gameGrid));
                         }else{
                             let x = gameGrid[i][j].x;
                             let y = gameGrid[i][j].y;
@@ -531,31 +479,7 @@ class King extends Piece {
     }
 }
 
-const kingTableBlackEarly = [
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-20, -30, -30, -40, -40, -30, -30, -20],
-    [-10, -20, -20, -20, -20, -20, -20, -10],
-    [20, 20, 0, 0, 0, 0, 20, 20],
-    [20, 30, 10, 0, 0, 10, 30, 20]
-];
 
-const kingTableWhiteEarly = kingTableBlackEarly.slice().reverse();
-
-const kingTableBlackLate = [
-    [-50, -30, -30, -30, -30, -30, -30, -50],
-    [-30, -30, 0, 0, 0, 0, -30, -30],
-    [-30, 0, 20, 30, 30, 20, 0, -30],
-    [-30, 0, 30, 40, 40, 30, 0, -30],
-    [-30, 0, 30, 40, 40, 30, 0, -30],
-    [-30, 0, 20, 30, 30, 20, 0, -30],
-    [-30, -30, 0, 0, 0, 0, -30, -30],
-    [-50, -30, -30, -30, -30, -30, -30, -50]
-];
-
-const kingTableWhiteLate = kingTableBlackLate.slice().reverse();
 
 class Queen extends Piece {
     constructor(x, y, player){
@@ -568,7 +492,7 @@ class Queen extends Piece {
             this.image = loadImage('images/black_queen.png');
         }
     }
-    GetMoves(c){
+    GetMoves(c, gameGrid){
         let moves = [];
         for (let i = 1; i < 8; i++){
             if (this.x + i < 8){
@@ -694,20 +618,25 @@ class Queen extends Piece {
     }
 }
 
-const queenTableBlack = [
-    [-20, -10, -10, -5, -5, -10, -10, -20],
-    [-10, 0, 0, 0, 0, 0, 0, -10],
-    [-10, 0, 5, 5, 5, 5, 0, -10],
-    [-5, 0, 5, 5, 5, 5, 0, -5],
-    [0, 0, 5, 5, 5, 5, 0, -5],
-    [-10, 5, 5, 5, 5, 5, 0, -10],
-    [-10, 0, 5, 0, 0, 0, 0, -10],
-    [-20, -10, -10, -5, -5, -10, -10, -20]
-];
+function removeLostMoves(moves, player, movingPiece){ // this function is used to remove moves of a piece that would put the pieces king in check, it is called by every pieces GetMoves function except kings
+    let answer = [];
+    for (let i = 0; i < moves.length; i++){
+        gameGrid[movingPiece.y][movingPiece.x] = null;
+        let tilePiece = gameGrid[moves[i][1]][moves[i][0]];
+        gameGrid[moves[i][1]][moves[i][0]] = movingPiece;
+        if (checkCheck(gameGrid, player)){ // this is done to check if the move is valid
+            gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
+            gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
+            continue;
+        }else{
+            answer.push(moves[i]);
+        }
+        gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
+        gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
+    }
 
-const queenTableWhite = queenTableBlack.slice().reverse();
-
-const tableOfTables = [["Pawn", pawnTableWhite,pawnTableBlack], ["Rook", rookTableWhite, rookTableBlack], ["Bishop", bishopTableWhite, bishopTableBlack], ["Knight", knightTableWhite, knightTableBlack], ["King", kingTableWhiteEarly, kingTableBlackEarly, kingTableWhiteLate, kingTableBlackLate], ["Queen", queenTableWhite, queenTableBlack]];
+    return answer;
+}
 
 let scenario = 0;
 let faze = ["early", "early"]; // this is important for the bot to know what phase of the game it is in since some of the tables are different for early and late game
@@ -1180,133 +1109,9 @@ function findBestMove(nodes){ // this function finds the best move for the bot f
     return bestMove;
 }
 
-function valuePlayersPieces(grid, player){ // this function is used by the bot to evaluate the value of the board
-    let value = 0;
-    let index = 0;
-    let nP = player == "white" ? 1 : 2;
-    for (let i = 0; i < 8; i++){
-        for (let j = 0; j < 8; j++){
-            if (grid[i][j] != null && grid[i][j].player == nP){  // this part of the code uses the tables to evaluate the value of the pieces more accurately
-                value += grid[i][j].value;
-                for (let k = 0; k < tableOfTables.length; k++){
-                    if(grid[i][j].type == tableOfTables[k][0]){
-                        index = k;
-                    }
-                }
-                if (grid[i][j].type != "King" && grid[i][j].type == tableOfTables[index][0]){
-                    value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
-                }else if (faze[nP - 1] == "early"){
-                    value = value + tableOfTables[index][grid[i][j].player][i][j]/100;
-                }else if (faze[nP - 1] == "late"){
-                    value = value + tableOfTables[index][grid[i][j].player + 2][i][j]/100;
-                }
-            }
-        }
-    }
-    return parseFloat(Math.round(value*100) / 100);
-}
 
-class Node{ // this is used during the recursion
-    constructor(player, depth, parent, value){
-        this.player = player;
-        this.depth = depth;
-        this.children = [];
-        this.parent = parent;
-        this.value = value;
-    }
-    addChild(child){
-        this.children.push(child);
-    }
-}
 
-// two important global variables of the bot, scores for storing the values of each move during the recursion, and controlVariable that counts the number of tested moves, it is just for debugging since recursion is hard to debug
-let controlVariable = 0;
-let scores = [];
-let controlScores = [];
-let winningDepth = 10000000000000;
 
-function recursiveFunc(grid, player, depth, desiredDepth , NODE){ // this is a recursive function used by the bot to evaluate moves of the board
-    //try{
-    //console.log(player);
-    // this is all still under construction, but can be experienced in the current state of the game
-    depth++;
-    //console.log("depth: " + depth);
-    let originalPlayer = player;
-    player = player == "white" ? "black" : "white";
-    let nP = player == "white" ? 1 : 2;
-    //console.log(player);
-    let allMoveOptions = [];
-    for (let i = 0; i < 8; i++){ // getting all the possible moves of the player
-        for (let j = 0; j < 8; j++){
-            if (grid[i][j] != null && grid[i][j].player == nP){
-                let moves = grid[i][j].GetMoves(true);
-                if (moves.length != 0){
-                    allMoveOptions.push([grid[i][j], moves]);
-                }
-            }
-        }
-    }
-    /*if (player == "white"){
-        console.log(allMoveOptions);
-        console.log("---------------");
-    }*/
-    for (let i =0; i < allMoveOptions.length; i++){ // this loop goes through all the possible moves and evaluates them, and if the desired depth of the recursion has not been reached yet it will create another layer of recursion
-        for (let j = 0; j < allMoveOptions[i][1].length; j++){
-            // removing the king from moves to prevent a bug
-            controlVariable++;
-            let movedPiece = allMoveOptions[i][0];
-            let oX = movedPiece.x;
-            let oY = movedPiece.y;
-            let endingMove = false;
-            let tInPlace = grid[allMoveOptions[i][1][j][1]][allMoveOptions[i][1][j][0]];
-            grid[movedPiece.y].splice(movedPiece.x, 0);
-            grid[movedPiece.y].splice(movedPiece.x, 1, null);
-            let newX = allMoveOptions[i][1][j][0];
-            let newY = allMoveOptions[i][1][j][1];
-            grid[newY].splice(newX, 0);
-            grid[newY].splice(newX, 1, movedPiece);
-            grid[newY][newX].x = newX;
-            grid[newY][newX].y = newY;
-            //console.log("added child");
-            let value = parseInt(parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black":"white"))*100)/100;
-            //console.log(checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true));
-            //console.log(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true));
-            //console.log("-------------------------");
-            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
-                //console.log("win at depth: " + depth + " won");
-                //console.log("/////////////////////////////////////");
-                if (winningDepth == null || winningDepth > depth){
-                    winningDepth = depth;
-                }
-                endingMove = true;
-                value = parseInt(parseFloat(value + 10000000)*100)/100;
-            }else if(checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw" || checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "draw"){
-                endingMove = true;
-                value = parseInt(parseFloat(value - 10000000)*100)/100;
-                /*console.log("draw at depth: " + depth);
-                console.log(gameGrid);
-                console.log(currentPlayer);
-                console.log(checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true));*/
-            }
-            NODE.addChild(new Node(player, depth, NODE, value));
-            if (depth < desiredDepth && !endingMove && depth < winningDepth){
-                //console.log("depth: " + depth, "desiredDepth: " + desiredDepth);
-                recursiveFunc(grid, player, depth, desiredDepth, NODE.children[NODE.children.length - 1]);
-            }
-            grid[newY].splice(newX, 0);
-            grid[newY].splice(newX, 1, tInPlace);
-            grid[oY].splice(oX, 0);
-            grid[oY].splice(oX, 1, movedPiece);
-            grid[oY][oX].x = oX;
-            grid[oY][oX].y = oY;
-        }
-    }
-    player = originalPlayer;
-/*}catch{
-    console.log(gameGrid);
-    console.log("error");
-}*/
-}
 
 function makeMove(move){ // this function is used by the bot to make the selected move
     // still under construction
@@ -1329,223 +1134,29 @@ function makeMove(move){ // this function is used by the bot to make the selecte
     movingPiece.numMoves++;
 }
 
-let answerList = []; // this might be replaced in the future, depends on if it works or not
-function endNodesRecursive(node){ // this function will recursively find the end nodes of a starting move node
-    //console.log(node);
-    let children = node.children;
-    //console.log(children);
-    answerList.push(node);
-    for (let i = 0; i < children.length; i++){
-        endNodesRecursive(children[i]);
-    }
-    /*console.log("------");
-    console.log(answerList);
-    console.log("------");*/
-}
-
-let nodes = []; // this is an array of the first level depth nodes
-
-function resNodes(){ // this function is used to restructure the scores array, this is done because of a recursion bug that I couldnt find a different solution for
-    //console.log(nodes);
-    //return;
-    let Nodes = [];
-        answerList = [];
-    for (let i = 0; i < nodes.length; i++){
-        endNodesRecursive(nodes[i][1]);/*
-        for (let j = 0; j < answerList.length; j++){
-            for (let k = 0; k < scores.length; k++){
-                if (endNodes[i][1][j].parent == endNodes[i][1][j]){
-                    endNodes[i][1].splice(j, 1);
-                }
-            }
-        }*/
-    }
-    Nodes.push(answerList);
-    /*console.log("-------------------------");
-    console.log("ending nodes here: ");
-    console.log(Nodes);
-    console.log("-------------------------");*/
-    return Nodes;
-}
-/*
-function ideaRec(nodes){
-    let nodesArray = [];
-    for (let i = 0; i <nodes.length; i++){
-        let node = nodes[i][1];
-        while(node.children.length != 0){
-            for (let j = 0; j < node.children.length; j++){
-                nodesArray.push(node.children[j]);
-            }
-            node = node.children[0];
-        }
-    }
-    return nodesArray;
-}*/
-
-function ideaFunc(nodes, desiredDepth, changedNodes, desiredDepth){ // i have an idea how to get the best move, I am not surre if it makes sense so I will try it in a special function separated from everything else
-    //console.log(changedNodes.length);
-    for (let i = desiredDepth; i >= 1; i--){
-        let parents = [];
-        for (let j = 0; j < changedNodes.length; j++){
-            //console.log(changedNodes[j].depth);
-            if (changedNodes[j].depth == i){
-                let add = true;
-                //console.log(i);
-                //return;
-                for (let k = 0; k < parents.length; k++){
-                    if (changedNodes[j].parent == parents[k]){
-                        add = false;
-                    }
-                }
-                if (add && changedNodes[j].parent != null){
-                    parents.push(changedNodes[j].parent);
-                }
-            }
-        }
-        //console.log(parents.length);
-        /*if (parents.length == 1){
-            //console.log("only one parent");
-            //console.log(parents[0]);
-            break;
-        }*/
-        //break;
-        for (let x = 0; x < parents.length; x++){
-            if (i % 2 != 0){ // maximizing
-                let max = -10000000
-                /*if (parents[x].children.length == 0){
-                    console.log(parents[x]);
-                }*/
-                for (let k = 0; k < parents[x].children.length; k++){
-                    if (parents[x].children[k].value > max){
-                        max = parents[x].children[k].value;
-                    }
-                }
-                parents[x].value = max;
-            }else{ // minimazing
-                let min = 10000000;
-                for (let k = 0; k < parents[x].children.length; k++){
-                    if (parents[x].children[k].value < min){
-                        min = parents[x].children[k].value;
-                    }
-                }
-                parents[x].value = min;
-            }
-        }
-    }
-    //console.log("hopefully results");
-    //console.log(nodes);
-    let bestMove = [];
-    let bestValue = -100000000;
-    let bestIndex = 0;
-    for (let i = 0; i < nodes.length; i++){
-        //console.log(nodes[i][1].value);
-        //console.log(nodes[i][1].depth);
-        //console.log("-----------------------------");
-        if (nodes[i][1].value > bestValue){
-            bestValue = nodes[i][1].value;
-            bestIndex = i;
-        }
-    }
-    for (let i = 0; i < scores.length; i++){
-        if (scores[i][2] == bestIndex){
-            bestMove = [scores[i][0], scores[i][1], scores[i][3], scores[i][4]];
-        }
-    }
-    //console.log(bestValue);
-    //console.log(bestMove);
-    return bestMove;
-}
-
 function enemyDecision(){ // this is the main function of the bot, it is called when its bots turn
-    // under construction
-    //console.log(gameGrid);
-    //return;
-    let bestMove = [];
-    // 3 is a good balance of speed and like playability??? of the bot
-    let desiredDepth = 3; // this is the most important variable for the bot, it determines how deep the recursion will go, the higher the number the better the bot will be
-    // current maximum is 4, its not really simple to go further since websites can only run on a single thread and because at level 4 its already 160 000 possible move combinations
-    /*if (numberOfPieces(gameGrid, "white") + numberOfPieces(gameGrid, "black") < 20){
-        desiredDepth = 3;
-    }else{
-        desiredDepth = 2;
-    }*/
-    winningDepth = 10000000000000;
-    scores = [];
-    nodes = [];
-    let num = 0;
-    for (let i = 0; i < 8; i++){ // this loop fils up the scores with possible moves, because only the first round of moves actually need scoring, the other moves after them just simply give their score to one of these moves
+    let cpGrid = [];
+    for (let i = 0; i < 8; i++){
+        cpGrid.push([]);
         for (let j = 0; j < 8; j++){
-            if (gameGrid[i][j] != null && gameGrid[i][j].player == whosBot){
-                let moves = gameGrid[i][j].GetMoves(true);
-                for (let k = 0; k < moves.length; k++){
-                    scores.push([i, j, num, moves[k][0], moves[k][1]]);
-                    num++;
-                }
+            if (gameGrid[i][j] != null){
+                cpGrid[i].push([gameGrid[i][j].type, gameGrid[i][j].player, gameGrid[i][j].numMoves]);
+            }else{
+                cpGrid[i].push(null);
             }
         }
     }
-    if (scores.length != 0){ // this makes sure that there wont be any errors when the bot is in a checkmate
-        for (let i = 0; i < scores.length; i++){ // one loop of the recursive function is basically here because the places for each moves score need to be asigned a place in the scores variable
-            let movingPiece = gameGrid[scores[i][0]][scores[i][1]];
-            let oX = movingPiece.x;
-            let oY = movingPiece.y;
-            let tInPlace = gameGrid[scores[i][4]][scores[i][3]];
-            let endingMove = false;
-            // moving the piece to the new place and checking how would that affect the board and the score
-            gameGrid[movingPiece.y].splice(movingPiece.x, 0);
-            gameGrid[movingPiece.y].splice(movingPiece.x, 1, null);
-            gameGrid[scores[i][4]].splice(scores[i][3], 0);
-            gameGrid[scores[i][4]].splice(scores[i][3], 1, movingPiece);
-            gameGrid[scores[i][4]][scores[i][3]].x = scores[i][3];
-            gameGrid[scores[i][4]][scores[i][3]].y = scores[i][4];
-            let value = parseInt(parseFloat(valuePlayersPieces(gameGrid, whosBot == 1 ? "white":"black") - valuePlayersPieces(gameGrid, whosBot == 1 ? "black":"white")) * 100) / 100;
-            if (checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "win"){
-                winningDepth = 0;
-                endingMove = true;
-                value = parseInt(parseFloat(value + 10000000) * 100) / 100;
-                //console.log("winning move at decision");
-            }else if (checkWin(gameGrid, whosBot == 1 ? "white":"black", false, true) == "win" || checkWin(gameGrid, whosBot == 1 ? "black":"white", false, true) == "draw"){
-                endingMove = true;
-                value = parseInt(parseFloat(value - 10000000) * 100) / 100;
-                //console.log("draw at decision");
-            }
-            //console.log(currentPlayer);
-            let n = new Node(currentPlayer, 1, null, value);
-            nodes.push([i, n]);
-            if (!endingMove && 1 < desiredDepth && 1 < winningDepth){ // if the move isnt a move that would cause a loss or a win imeadiately, the recursive function is called, it will run until it reaches the desired depth of search
-                //console.log("recursion");
-                //console.log(currentPlayer);
-                //console.log(gameGrid);
-                recursiveFunc(gameGrid, currentPlayer, 1,  desiredDepth,n);
-                //return;
-            }
-            // reseting the grid to its original state, so that the next move can be tested on the original board
-            gameGrid[scores[i][4]].splice(scores[i][3], 0);
-            gameGrid[scores[i][4]].splice(scores[i][3], 1, tInPlace);
-            gameGrid[oY].splice(oX, 0);
-            gameGrid[oY].splice(oX, 1, movingPiece);
-            gameGrid[oY][oX].x = oX;
-            gameGrid[oY][oX].y = oY;
-        }
-        controlVariable = 0;
-        //console.log(nodes);
-        //return;
-        //let restructuredNodes = resNodes();
-        /*console.log("restructured nodes");
-        console.log(restructuredNodes);
-        console.log("//////////");*/
-        //return;
-        let changedNodes = resNodes();
-        //console.log(changedNodes);
-        //console.log("////////////////////");
-        bestMove = ideaFunc(nodes, desiredDepth, changedNodes[0], desiredDepth);
-        //bestMove = findBestMove(restructuredNodes); // finding the best move from the restructuredNodes array, the one with the highest score is always selected
-        //return;
-        makeMove(bestMove); // making the move through a function since there is no simpler way to do it as far as I know
-        // this is the part of the code that checks if an end result happened
+    console.log("bot is " + whosBot);
+    //return;
+    algorithmWorker.postMessage([cpGrid, whosBot]);
+    workerWorking = true;
+    algorithmWorker.onmessage = function(bestMove){
+        console.log("best move is " + bestMove.data);
+        makeMove(bestMove.data);
+        currentPlayer = currentPlayer == "white" ? "black" : "white";
+        document.getElementById("currentPlayerText").innerHTML = "Current Player: " + currentPlayer;
+        workerWorking = false;
     }
-    currentPlayer = currentPlayer == "white" ? "black" : "white";
-    document.getElementById("currentPlayerText").innerHTML = "Current Player: " + currentPlayer;
 }
 
 function resizeCanvasFunc(){ // function for resizing the working canvas, it is needed to make the game completely responsive
@@ -1554,6 +1165,7 @@ function resizeCanvasFunc(){ // function for resizing the working canvas, it is 
     size = width > height ? height : width;
     resizeCanvas(size, size);
     baseSize = height / 8;
+    console.log("here");
 }
 
 window.addEventListener('resize', function () { // this ensures that canvas is resized when the window is resized
@@ -1613,26 +1225,6 @@ function loadingLayouts(){ // this function is used to load the game layouts fro
     }
 }
 
-function removeLostMoves(moves, player, movingPiece){ // this function is used to remove moves of a piece that would put the pieces king in check, it is called by every pieces GetMoves function except kings
-    let answer = [];
-    for (let i = 0; i < moves.length; i++){
-        gameGrid[movingPiece.y][movingPiece.x] = null;
-        let tilePiece = gameGrid[moves[i][1]][moves[i][0]];
-        gameGrid[moves[i][1]][moves[i][0]] = movingPiece;
-        if (checkCheck(gameGrid, player)){ // this is done to check if the move is valid
-            gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
-            gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
-            continue;
-        }else{
-            answer.push(moves[i]);
-        }
-        gameGrid[movingPiece.y][movingPiece.x] = movingPiece;
-        gameGrid[moves[i][1]][moves[i][0]] = tilePiece;
-    }
-
-    return answer;
-}
-
 function checkCheck(grid, player){ // this function checks if a player is in check, it used throughout the code to check if moves are valid
     let king = null;
     for (let i = 0; i < 8; i++){
@@ -1650,7 +1242,7 @@ function checkCheck(grid, player){ // this function checks if a player is in che
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player != player){
                 if (grid[i][j].type != "Pawn"){
-                    moves.push(grid[i][j].GetMoves(false));
+                    moves.push(grid[i][j].GetMoves(false, gameGrid));
                 }else{
                     if (grid[i][j].player == 1){
                         moves.push([grid[i][j].x + 1, grid[i][j].y + 1]);
@@ -1708,13 +1300,13 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
     }
     let numOfAlliedPieces = 0;
     let moves = [];
-    let kingMoves = king.GetMoves(true);
+    let kingMoves = king.GetMoves(true, gameGrid);
     kingMoves.push([king.x, king.y]);
     for (let i = 0; i < 8; i++){
         for (let j = 0; j < 8; j++){
             if (grid[i][j] != null && grid[i][j].player != nP){ // this part of the code is used to get all the moves of the enemy pieces and the piece that is currently checking the king
                 let currentAddedMoves = [];
-                currentAddedMoves.push(grid[i][j].GetMoves(false));
+                currentAddedMoves.push(grid[i][j].GetMoves(false, gameGrid));
                 if (grid[i][j].type == "Pawn"){
                     if (grid[i][j].player == 1){
                         currentAddedMoves[0].push([grid[i][j].x, grid[i][j].y + 1]);
@@ -1734,7 +1326,7 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
                 moves.push(currentAddedMoves);
             }
             if (grid[i][j] != null && grid[i][j].player == nP && grid[i][j].type != "King"){
-                if (grid[i][j].GetMoves(true).length != 0){
+                if (grid[i][j].GetMoves(true, gameGrid).length != 0){
                     numOfAlliedPieces++;
                 }
             }
@@ -1815,28 +1407,6 @@ function checkWin(grid, player,c, t){ // this function checks if a player has wo
     }
     return "no winner";
 }
- // this is some old code that caused issues with pieces disapearing
-                            /*grid[moves[k][1]].splice(moves[k][0], 0);
-                            grid[moves[k][1]].splice(moves[k][0], 1, grid[i][j]);
-                            grid[i].splice(j, 0);
-                            grid[i].splice(j, 1, null);
-                            console.log("something is happening here");
-                            if (!checkCheck(grid, nP)){
-                                grid[tempPiece.y].splice(tempPiece.x, 0);
-                                grid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
-                                grid[moves[k][1]].splice(moves[k][0], 0);
-                                grid[moves[k][1]].splice(moves[k][0], 1, movingPiece);
-                                if(c){ // the c is used to prevent a bug that was caused by the bot exploring the possible moves
-                                    highlightTiles(checkingPiece);
-                                }
-                                return "no winner";
-                            }
-                            grid[tempPiece.y].splice(tempPiece.x, 0);
-                            grid[tempPiece.y].splice(tempPiece.x, 1, tempPiece);
-                            grid[i].splice(j, 0);
-                            grid[i].splice(j, 1, grid[moves[k][1]][moves[k][0]]);
-                            grid[moves[k][1]].splice(moves[k][0], 0);
-                            grid[moves[k][1]].splice(moves[k][0], 1, null);*/
 
 function updateHistory(oldPos, newPos, takenPiece){ // this function is used to update the move history, it is called after every move, and its used for the undo and redo functions
     if (historyOffset > 0){
@@ -2009,11 +1579,15 @@ function checkWinners(){ // this function is used to check if the game is over
     //console.log(highlightedTiles);
 }
 
+let workerWorking = false; // this is used to check if the worker is busy, it is used to prevent the player from clicking on the board while the bot is making a move
 function mousePressed() { // this function is called when the mouse is pressed, it is used to for selecting and moving pieces
     let x = Math.floor(mouseX / baseSize); // this gets the tile that the player clicked on
     let y = Math.floor(mouseY / baseSize);
     let moveSelected = false;
     let selected = { x: 0, y: 0 };
+    if (workerWorking){
+        return;
+    }
     for (let i = 0; i < availableMoves.length; i++) {
         if (x == availableMoves[i][0] && y == availableMoves[i][1]) { // this is for moving a piece, it checks if the player clicked on a tile that is available for the selected piece
             moveSelected = true;
@@ -2085,7 +1659,30 @@ function mousePressed() { // this function is called when the mouse is pressed, 
             if (enemy == "bot"){
                 //console.log(highlightedTiles);
                 setTimeout(function(){
-                    enemyDecision();
+                    //enemyDecision(); //this is the bot move call, uncomment later
+                    console.log("message sent");
+                    console.log(gameGrid);
+                    let cpGrid = [];
+                    for (let i = 0; i < gameGrid.length; i++){
+                        cpGrid.push([]);
+                        for (let j = 0; j < gameGrid[i].length; j++){
+                            if (gameGrid[i][j] != null){
+                                cpGrid[i].push([gameGrid[i][j].type, gameGrid[i][j].player, gameGrid[i][j].numMoves]);
+                            }else{
+                                cpGrid[i].push(null);
+                            }
+                        }
+                    }
+                    algorithmWorker.postMessage([cpGrid, whosBot]);
+                    workerWorking = true;
+                    algorithmWorker.onmessage = function(bestMove){
+                        console.log("result of the worker is " + bestMove.data);
+                        makeMove(bestMove.data);
+                        currentPlayer = currentPlayer == "white" ? "black" : "white";
+                        document.getElementById("currentPlayerText").innerHTML = "Current Player: " + currentPlayer;
+                        workerWorking = false;
+                    }
+                    //console.log("message sent");
                 }, 50); // there has to be some delay to allow the board on the page to update
                 //console.log(t);
                 //console.log("here");
@@ -2099,7 +1696,7 @@ function mousePressed() { // this function is called when the mouse is pressed, 
     }
     let nP = currentPlayer == "white" ? 1 : 2;
     if (x < 8 && y < 8 && x >= 0 && y >= 0 && gameGrid[y][x] != null && !moveSelected && gameGrid[y][x].player == nP) { // this is for selecting a piece and displaying its available moves
-        availableMoves = gameGrid[y][x].GetMoves(true);
+        availableMoves = gameGrid[y][x].GetMoves(true, gameGrid);
         for (let j = 0; j < 8; j++) {
             for (let k = 0; k < 8; k++) {
                 if (gameGrid[j][k] != null) {
